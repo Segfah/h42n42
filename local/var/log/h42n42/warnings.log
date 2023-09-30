@@ -1,0 +1,5 @@
+Sep 30 01:24:30: ocsigen:main: Command pipe created
+Sep 30 01:24:31: ocsigen:config: While parsing config file, tag <host>: No defaulthostname, assuming it is "corozco"
+Sep 30 01:24:58: ocsigen:config: While parsing config file, tag <host>: No defaulthostname, assuming it is "corozco"
+Sep 30 01:27:52: ocsigen:config: While parsing config file, tag <host>: No defaulthostname, assuming it is "corozco"
+Sep 30 01:31:58: ocsigen:config: While parsing config file, tag <host>: No defaulthostname, assuming it is "corozco"
