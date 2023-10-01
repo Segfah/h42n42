@@ -1,3 +1,28 @@
 * {
     font-family: sans-serif;
 }
+
+:root {
+    --color-gray: #202020;
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+    --color-red: #FF0000;
+    --color-blue: #0000FF;
+    --color-yellow: #FFFF00;
+    --color-green: #00FF00;
+    --color-orange: #FFA500;
+    --color-purple: #800080;
+    --color-red-orange: #FF4500;
+    --color-yellow-orange: #FFAE42;
+    --color-yellow-green: #9ACD32;
+    --color-blue-green: #20B2AA;
+    --color-blue-purple: #8A2BE2;
+    --color-red-purple: #9932CC;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+    color: var(--color-gray);
+    font-size: 20px;
+}

@@ -17,6 +17,15 @@ let main_service =
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
+let page =
+  body [
+    div ~a:[a_class ["title"]][
+      h1 [txt " H42N42"];
+    ]
+  ]
+
+
+
 let () =
   H42n42_app.register
     ~service:main_service
@@ -25,6 +34,4 @@ let () =
          (Eliom_tools.F.html
             ~title:"h42n42"
             ~css:[["css";"h42n42.css"]]
-            Html.F.(body [
-              h1 [txt " from Eliom's distillery!"];
-            ])))
+            Html.F.(page)))
