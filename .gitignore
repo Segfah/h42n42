@@ -1,0 +1,40 @@
+# Bytecode files (OCaml)
+*.cmi
+*.cmo
+*.cma
+*.cmx
+*.cmxa
+*.a
+*.o
+
+# Executable files
+*.byte
+*.native
+
+# OPAM switch (local OPAM directory)
+_opam/
+
+# Dune build directory
+_build/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Eliom specific files
+*.type_mli
+*.type_mli.depends
