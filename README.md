@@ -1,6 +1,13 @@
-# Installation sur mac
+## installation linux
+https://ocaml.org/docs/up-and-running
+```
+$ bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
+$ opam init
+$ eval $(opam env)
+```
+## Installation sur mac
 
-## INSTALLATION
+### INSTALLATION
 ```
 brew install opam
 opam init
@@ -10,12 +17,13 @@ opam install cstruct
 
 
 echo "export DYLD_LIBRARY_PATH=/Users/corozco/.opam/default/lib/stublibs:$DYLD_LIBRARY_PATH" >> ~/.zshrc
+source  ~/.zshrc
 ```
 
-## EXECUTION
+### EXECUTION
 ```
 make test.byte
 ```
 
-## URL
+### URL
 localhost:8080
