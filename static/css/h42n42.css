@@ -2,6 +2,22 @@
     font-family: sans-serif;
 }
 
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-greige);
+}
+
+.wrapper {
+    text-align: center; /* Esto centrará el título */
+    width: 800px; /* Igual al ancho de .container */
+}
+
+
+
 :root {
     --color-gray: #202020;
     --color-white: #FFFFFF;
@@ -18,6 +34,8 @@
     --color-blue-green: #20B2AA;
     --color-blue-purple: #8A2BE2;
     --color-red-purple: #9932CC;
+    --color-greige: #ddd5bf;
+    --color-sky: #99daf9;
 }
 
 .title {
@@ -26,3 +44,66 @@
     color: var(--color-gray);
     font-size: 20px;
 }
+
+.container {
+    /* Ajusta el ancho y alto del contenedor si es necesario */
+    width: 800px;
+    height: 700px;
+    border: 2px solid black; /* Un borde para visualizar el contenedor completo */
+}
+
+/* RIO */
+@keyframes rippleEffect {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.rio {
+    background-color: #1E88E5;
+    height: 80px;
+    background: linear-gradient(169deg, #1E88E5, #0057A8, #1ecb4b, #0057A8);
+    background-size: 400% 400%;
+    animation: rippleEffect 6s ease infinite;
+}
+
+.death-cross {
+    width: 10%; /* Ajusta este valor según la necesidad */
+    height: auto; /* Esto mantiene la relación de aspecto de la imagen */
+    display: block; /* Para garantizar que la imagen se trate como un bloque y se centre correctamente si se necesita */
+    margin: 0 auto; /* Esto centrará la imagen horizontalmente dentro del div */
+}
+
+/* FIN RIO */
+
+.bueno {
+    background-color: var(--color-sky);
+    height: 500px; 
+}
+/* FIN ENFERMERIA */
+
+
+.container-enfermeria {
+    display: flex;
+}
+
+.enfermeria {
+    background-color: #b98b57;
+    height: 120px;
+}
+
+.enfermeria-cross {
+    width: 45%; /* Ajusta este valor según la necesidad */
+    height: auto; /* Esto mantiene la relación de aspecto de la imagen */
+    display: block; /* Para garantizar que la imagen se trate como un bloque y se centre correctamente si se necesita */
+    margin: 0 auto; /* Esto centrará la imagen horizontalmente dentro del div */
+}
+
+
+/* FIN ENFERMERIA */
