@@ -1,17 +1,15 @@
 * {
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
 }
 
 body {
-    margin: 0;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-greige);
+    background-color: var(--color-white);
 }
 
-.wrapper {
+.wrap {
     text-align: center; /* Esto centrará el título */
     width: 800px; /* Igual al ancho de .container */
 }
@@ -36,23 +34,30 @@ body {
     --color-red-purple: #9932CC;
     --color-greige: #ddd5bf;
     --color-sky: #99daf9;
+    --color-sky-white: #EDEDED
 }
 
 .title {
-    display: flex;
-    justify-content: center;
+    text-align: center;
     color: var(--color-gray);
     font-size: 20px;
 }
 
+.title {
+    text-align: center;
+    color: var(--color-gray);
+    font-size: 12px;
+}
+
 .container {
-    /* Ajusta el ancho y alto del contenedor si es necesario */
+    /* Ajusta el ancho y alto del contenedor si es necesariver */
     width: 800px;
     height: 700px;
     border: 2px solid black; /* Un borde para visualizar el contenedor completo */
+    box-shadow: -1px -1px 10px rgb(0 0 0)
 }
 
-/* RIO */
+/* river */
 @keyframes rippleEffect {
     0% {
         background-position: 0% 50%;
@@ -65,10 +70,10 @@ body {
     }
 }
 
-.rio {
+.river {
     background-color: #1E88E5;
     height: 80px;
-    background: linear-gradient(169deg, #1E88E5, #0057A8, #1ecb4b, #0057A8);
+    background: linear-gradient(169deg, #1E88E5, #8db9cf, #8cc2d7, #0057A8);
     background-size: 400% 400%;
     animation: rippleEffect 6s ease infinite;
 }
@@ -80,10 +85,10 @@ body {
     margin: 0 auto; /* Esto centrará la imagen horizontalmente dentro del div */
 }
 
-/* FIN RIO */
+/* FIN river */
 
 .bueno {
-    background-color: var(--color-sky);
+    background-color: var(--color-sky-white);
     height: 500px; 
 }
 /* FIN ENFERMERIA */
@@ -94,7 +99,7 @@ body {
 }
 
 .enfermeria {
-    background-color: #b98b57;
+    background-color: #f9c489;
     height: 120px;
 }
 
@@ -107,3 +112,10 @@ body {
 
 
 /* FIN ENFERMERIA */
+
+.creet {
+    height: 20px;
+    width: 20px;
+    background-color: #202020;
+    position: relative;
+}
