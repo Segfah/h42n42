@@ -63,7 +63,6 @@ let () =
   H42n42_app.register
     ~service:main_service
     (fun () () ->
-                      //let _ = [%client (init_client () : unit)] in
       Lwt.return
         (Eliom_tools.F.html
           ~title:"h42n42"
