@@ -32,7 +32,7 @@ RUN opam init -y --disable-sandboxing
 RUN eval $(opam env)
 
 # Instalamos las dependencias de OCaml
-RUN opam install -y eliom Js_of_ocaml ocsipersist-pgsql cstruct
+RUN opam install -y Js_of_ocaml ocsipersist-pgsql cstruct
 
 # Configuramos el servidor SSH
 RUN mkdir /var/run/sshd && \
@@ -48,8 +48,9 @@ WORKDIR /app
 # Copia el script al contenedor
 COPY src/start.sh /start.sh
 
+RUN eval $(opam env) && opam install -y eliom
+
 # Establece el script como el comando por defecto a ejecutar cuando se inicie el contenedor
 #CMD ["/start.sh"]
-
 
 CMD ["/usr/sbin/sshd", "-D"]
