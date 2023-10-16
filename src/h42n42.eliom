@@ -59,24 +59,6 @@ let page =
   ]
 
 
-[%%client
-type creet = { elt : Html_types.div elt; dom_elt : Dom_html.divElement Js.t }
-
-let create_creet () =
-  let elt = div ~a:[ a_class [ "creet" ] ] [] in
-  { elt; dom_elt = Eliom_content.Html.(To_dom.of_div elt) }
-
-let init_client () =
-  let playground = Eliom_content.Html.To_dom.of_div ~%playground_elt in
-  Firebug.console##log_2 (Js.string "playground") playground;
-
-  let creet = create_creet () in
-  Firebug.console##log_2 (Js.string "creet") creet;
-
-  Dom.appendChild playground creet.dom_elt]
-
-
-
 let main_service =
   Eliom_service.create
     ~path:(Eliom_service.Path [])
