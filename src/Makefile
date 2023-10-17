@@ -14,9 +14,9 @@ include Makefile.options
 ## Required binaries
 ELIOMC            := eliomc -ppx
 ELIOMOPT          := eliomopt -ppx
-JS_OF_ELIOM       := js_of_eliom -ppx
+JS_OF_ELIOM       := js_of_eliom -jsopt /root/.opam/default/lib/bigstringaf/runtime.js -ppx 
 ELIOMDEP          := eliomdep
-OCSIGENSERVER     := ocsigenserver
+OCSIGENSERVER     := DYLD_LIBRARY_PATH=$(shell opam var lib)/stublibs ocsigenserver
 OCSIGENSERVER.OPT := ocsigenserver.opt
 
 ## Where to put intermediate object files.
