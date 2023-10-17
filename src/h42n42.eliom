@@ -12,36 +12,36 @@ module H42n42_app =
     let global_data_path = None
   end)
 
-let main_service =
-  Eliom_service.create
-    ~path:(Eliom_service.Path [])
-    ~meth:(Eliom_service.Get Eliom_parameter.unit)
-    ()
+let river =
+  div ~a:[a_class ["river"]] [
+    img ~a:[a_class ["death-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "muertecita.png"]) ~alt:"Muerte" ()
+  ]
 
 let bueno = 
   div ~a:[a_class ["bueno"]] []
 
+let hospital =
+  div ~a:[a_class ["hospital"]] [
+    div ~a:[a_class ["healing-plants"]] [
+        img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
+      ];
+    div ~a:[a_class ["healing-plants"]] [
+        img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
+      ];
+    div ~a:[a_class ["healing-plants"]] [
+        img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
+      ];
+    div ~a:[a_class ["healing-plants"]] [
+        img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
+      ]
+  ]
+
 let board =
   div ~a:[a_class [""]] [
     div ~a:[a_class ["container"]] [
-      div ~a:[a_class ["river"]] [
-        img ~a:[a_class ["death-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "muertecita.png"]) ~alt:"Muerte" ()
-      ];
+      river;
       bueno;
-      div ~a:[a_class ["container-enfermeria"]] [
-        div ~a:[a_class ["enfermeria"]] [
-            img ~a:[a_class ["enfermeria-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
-          ];
-        div ~a:[a_class ["enfermeria"]] [
-            img ~a:[a_class ["enfermeria-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
-          ];
-        div ~a:[a_class ["enfermeria"]] [
-            img ~a:[a_class ["enfermeria-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
-          ];
-        div ~a:[a_class ["enfermeria"]] [
-            img ~a:[a_class ["enfermeria-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
-          ]
-      ]
+      hospital;
     ]
   ]
 
@@ -58,6 +58,12 @@ let page =
     ]
   ]
 
+
+let main_service =
+  Eliom_service.create
+    ~path:(Eliom_service.Path [])
+    ~meth:(Eliom_service.Get Eliom_parameter.unit)
+    ()
 
 let () =
   H42n42_app.register
