@@ -27,7 +27,7 @@ connect_ssh() {
 # Function to build and run the container
 build_and_run() {
     docker build -t h42n42 .
-    docker run -d -v $(pwd):/app -p 8080:8080 -p 2222:22 h42n42
+    docker run --rm --name h42n42 -d -v $(pwd):/app -p 8080:8080 -p 2222:22 h42n42
 }
 
 # Función para recargar (ejecutar make test.byte dentro del contenedor)
