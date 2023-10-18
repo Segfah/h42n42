@@ -40,5 +40,5 @@ _build/
 *.type_mli.depends
 
 # Generated javascript files
-./src/local/var/www/h42n42/eliom
-./src/_client
+src/local/var/www/h42n42/eliom/
+src/_client
