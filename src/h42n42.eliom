@@ -37,6 +37,12 @@ open Creet
       	creet_list := creet :: !creet_list;
 	  done;
 
+    (* si tu veux tester un creat qui ne se deplace pas *)
+    (*
+    let ptrp = Creet.create () in
+    Html.Manip.appendChild ~%bueno ptrp.elt;
+    *)
+
 	  (* List.iter (add_creet) creet_list; *)
 	  Lwt.async (fun () -> runner creet_list)
 

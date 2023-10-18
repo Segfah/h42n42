@@ -21,12 +21,13 @@ open Lwt_js_events
 
 	let create () = 
 		let elt = div ~a:[ a_class [ "creet" ] ] [] in
+		let size = 50 in
 		let creet = {
 				elt;
 				dom = Html.To_dom.of_div elt;
-				size = 50;
-				margin_top  = Random.int (620 - 50);
-				margin_left = Random.int (800 - 50);
+				size;
+				margin_top  = Random.int (620 - size);
+				margin_left = Random.int (800 - size);
 				status = Healthy;
 				speed = 5;
 		} in
@@ -50,6 +51,15 @@ open Lwt_js_events
 			creet.size creet.margin_top creet.margin_left status_str in
 		Firebug.console##log (Js.string msg)
 
+	let set_background_image creet =
+		let img_url = match creet.status with
+			| Healthy -> "../images/run_sonic.gif"
+			| Sick -> "../images/maladev1.gif"
+			| Berserk -> "../images/berserkv1.gif"
+			| Mean -> "../images/deathv1.gif"
+		in
+		creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
+
 
 	let random_direction () =
 		let step_top  = Random.int 2 in
@@ -64,12 +74,15 @@ open Lwt_js_events
 			creet.speed <- int_of_float (float_of_int creet.speed *. 0.85);
 			if chance < 80 then begin
 				creet.status <- Sick;
+				set_background_image creet;
 			end
 			else if chance < 90 then begin
 				creet.status <- Berserk;
+				set_background_image creet;
 			end
 			else begin
 				creet.status <- Mean;
+				set_background_image creet;
 			end;
 			creet
 		| _ -> creet  (* s'il est deja malade il ne change pas de status*)
@@ -88,7 +101,7 @@ open Lwt_js_events
 		creet.dom##.style##.marginTop := _into_px creet.margin_top;
 		creet.dom##.style##.marginLeft := _into_px creet.margin_left;
 
-		if creet.margin_top < -50 then
+		if creet.margin_top < -50 then (* la taille de l'image css *)
       	  ignore (change_status_randomly creet);
 
 		print_creet creet;
