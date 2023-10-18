@@ -18,18 +18,25 @@ open Creet
 
 	let speed = ref 10.
 
-	let rec runner creet = 
+	let rec runner creet_list = 
 		(* Add/remove creet *)
 		(* Change status *)
 		(* Move creets *)
-		let creet = Creet.move creet in
-		let%lwt () = Lwt_js.sleep 1.0 in
-		runner creet
+		(* List.map (fun creet -> Creet.move creet) creet_list; *)
+		let%lwt () = Lwt_js.sleep 0.01 in
+		runner creet_list
 
 	let play () =
-	  let creet = Creet.create () in
-	  Html.Manip.appendChild ~%bueno creet.elt;
-	  Lwt.async (fun () -> runner creet)
+	  Random.self_init();
+	  let creet_list = ref [] in
+	  for _ = 1 to 4 do
+      	let creet = Creet.create () in
+	  	Html.Manip.appendChild ~%bueno creet.elt;
+      	creet_list := creet :: !creet_list;
+	  done;
+
+	  (* List.iter (add_creet) creet_list; *)
+	  Lwt.async (fun () -> runner creet_list)
 
 
 (**)]
