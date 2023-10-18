@@ -89,29 +89,30 @@ body {
 
 .bueno {
     background-color: var(--color-sky-white);
-    height: 500px; 
+    height: 520px; 
 }
-/* FIN healing-plants */
+/* FIN bueno */
 
 
 .hospital {
     display: flex;
 }
 
-.healing-plants {
+.doctor-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #f9c489;
-    height: 120px;
+    height: 100px;
 }
 
-.plants-img {
-    width: 35%; /* Ajusta este valor según la necesidad */
-    height: auto; /* Esto mantiene la relación de aspecto de la imagen */
-    display: block; /* Para garantizar que la imagen se trate como un bloque y se centre correctamente si se necesita */
-    margin: 20px auto; /* Esto centrará la imagen horizontalmente dentro del div */
+.doctor-img {
+    width: 30%;
+    height: auto;
 }
 
 
-/* FIN healing-plants */
+/* FIN doctor-container */
 
 .creet {
     background-image: url("../images/run_sonic.gif");
