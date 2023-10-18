@@ -55,12 +55,12 @@ module H42n42_app =
 
 let river =
   div ~a:[a_class ["river"]] [
-    img ~a:[a_class ["death-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "muertecita.png"]) ~alt:"Muerte" ()
+    img ~a:[a_class ["death-cross"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "virus.gif"]) ~alt:"Muerte" ()
   ]
 
 let plant_div () =
   div ~a:[a_class ["healing-plants"]] [
-      img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "plantica.png"]) ~alt:"Cruz" ()
+      img ~a:[a_class ["plants-img"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "doctor.gif"]) ~alt:"Cruz" ()
   ]
 
 let hospital =

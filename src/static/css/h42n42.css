@@ -104,10 +104,10 @@ body {
 }
 
 .plants-img {
-    width: 45%; /* Ajusta este valor según la necesidad */
+    width: 35%; /* Ajusta este valor según la necesidad */
     height: auto; /* Esto mantiene la relación de aspecto de la imagen */
     display: block; /* Para garantizar que la imagen se trate como un bloque y se centre correctamente si se necesita */
-    margin: 0 auto; /* Esto centrará la imagen horizontalmente dentro del div */
+    margin: 20px auto; /* Esto centrará la imagen horizontalmente dentro del div */
 }
 
 
