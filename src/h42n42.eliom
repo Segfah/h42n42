@@ -19,10 +19,12 @@ open Creet
 	let speed = ref 10.
 
 	let rec runner creet_list = 
+    (*  *)
 		(* Add/remove creet *)
 		(* Change status *)
 		(* Move creets *)
 		(* List.map (fun creet -> Creet.move creet) creet_list; *)
+    List.iter (fun creet -> ignore (Creet.move creet)) !creet_list;
 		let%lwt () = Lwt_js.sleep 0.01 in
 		runner creet_list
 
