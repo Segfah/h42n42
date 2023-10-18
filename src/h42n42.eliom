@@ -5,7 +5,7 @@ open Html.D
 open Js_of_ocaml
 
 let bueno = div ~a:[a_class ["bueno"]] []
-
+let start_button = div ~a:[a_class ["button-start"]; a_id "start-button"] [txt "JUGAR"]
 ]
 
 [%%client
@@ -38,6 +38,21 @@ open Creet
 	  (* List.iter (add_creet) creet_list; *)
 	  Lwt.async (fun () -> runner creet_list)
 
+
+  let attach_start_event () =
+    let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in
+
+    match button with
+    | None -> ()
+    | Some btn -> 
+      btn##.onclick := Dom_html.handler (fun _ -> 
+        let () = Firebug.console##log (Js.string "clic") in
+        btn##.classList##add (Js.string "button-des");
+        play ();
+        Js._true
+      )
+
+  let () = attach_start_event ()
 
 (**)]
 
@@ -81,9 +96,7 @@ let page =
       div ~a:[a_class ["title"]] [
         h1 [txt "H42N42"]
       ];
-      div ~a:[a_class ["autor"]] [
-        h3 [txt "corozco"]
-      ];
+      start_button;
       board;
     ]
   ]
@@ -99,7 +112,7 @@ let () =
   H42n42_app.register
     ~service:main_service
     (fun () () ->
-      let _ = [%client (play () : unit)] in
+      let _ = [%client (attach_start_event () : unit)] in
       Lwt.return
         (Eliom_tools.D.html
           ~title:"h42n42"

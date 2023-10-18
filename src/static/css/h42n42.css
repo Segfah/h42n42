@@ -119,3 +119,35 @@ body {
 	background-position: center;
 	background-size: cover;
 }
+
+
+.button-start {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-bottom: 20px;
+}
+
+.button-start:hover {
+    background-color: #2980b9;
+}
+
+.button-start:active {
+    transform: scale(0.95);
+}
+
+.button-des {
+    pointer-events:none;
+    background-color: var(--color-gray) !important;
+    color: #777;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
