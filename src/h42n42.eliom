@@ -18,34 +18,32 @@ open Creet
 
     let speed = ref 10.
 
-    let rec runner healthy_creets sick_creets = 
-        List.iter (fun creet -> ignore (Creet.update creet !sick_creets)) !healthy_creets;
-        List.iter (fun creet -> ignore (Creet.update creet !healthy_creets)) !sick_creets;
+    let rec runner healthy_creets = 
+		let healthy, sick = List.partition (fun creet -> creet.status == Healthy) healthy_creets in
+        let healthy = List.map (fun creet -> Creet.update creet sick) healthy in
+        let sick    = List.map (fun creet -> Creet.update creet healthy) sick in
 
+		let healthy_creets = sick @ healthy in
         let%lwt () = Lwt_js.sleep 0.001 in
-        runner healthy_creets sick_creets
+        runner healthy_creets
+	
+	let creet_init () =
+          let creet = Creet.create () in
+          Html.Manip.appendChild ~%bueno creet.elt;
+		  creet
 
     let play () =
       Random.self_init();
-      let healthy_creet_list = ref [] in
-      let sick_creet_list = ref [] in
-      for _ = 1 to 4 do
-          let creet = Creet.create () in
-          Html.Manip.appendChild ~%bueno creet.elt;
-          healthy_creet_list := creet :: !healthy_creet_list;
-      done;
+      let list = List.init 4 (fun _ -> creet_init ()) in
+
+	  (* This creet is created just to test Mean *)
+	  (* The function change status has been modified to forcefully create mean *)
       let screet = Creet.create () in
 	  let screet = Creet.change_status_randomly screet in
+      let list = list @ [screet] in
       Html.Manip.appendChild ~%bueno screet.elt;
-      sick_creet_list := screet :: !sick_creet_list;
 
-    (* si tu veux tester un creat qui ne se deplace pas *)
-    (*
-    let ptrp = Creet.create () in
-    Html.Manip.appendChild ~%bueno ptrp.elt;
-    *)
-
-      Lwt.async (fun () -> runner healthy_creet_list sick_creet_list)
+      Lwt.async (fun () -> runner list)
 
 
   let attach_start_event () =

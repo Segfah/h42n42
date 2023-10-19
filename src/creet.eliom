@@ -38,6 +38,11 @@ open Lwt_js_events
 		let dist = Float.sqrt (x *. x +. y *. y) in
 		dist
 	
+	let intersect creet_one creet_two =
+		let distance = distance creet_one creet_two in
+		let creet_delta = creet_one.size /. 2. +. creet_two.size /. 2. in
+		distance < creet_delta
+	
 	let rec find x lst =
     	match lst with
     	| [] -> raise (Failure "Not Found")
@@ -45,16 +50,21 @@ open Lwt_js_events
 
 	let min_list lst = List.fold_left min (List.hd lst) (List.tl lst)
 	
-	let dir_nearest_creet creet creets_list =
+	let find_nearest_creet creet creets_list =
 		let distances = List.map(distance creet) creets_list in
 		let min_dist = min_list distances in
 		let index = find min_dist distances in
 		let nearest = List.nth creets_list index in
+		nearest
+
+	let dir_nearest_creet creet creets_list =
+		let nearest = find_nearest_creet creet creets_list in
+		let distance = distance creet nearest in
 		let x = nearest.margin_top -. creet.margin_top in
 		let y = nearest.margin_left -. creet.margin_left in
 	    let dir = {
-				vertical   = x /. min_dist;
-				horizontal = y /. min_dist;
+				vertical   = x /. distance;
+				horizontal = y /. distance;
 		} in 
 		dir
 	
@@ -68,7 +78,7 @@ open Lwt_js_events
                 margin_top  = Random.float (620. -. size);
                 margin_left = Random.float (800. -. size);
                 status = Healthy;
-                speed = 1.;
+                speed = 0.7;
 				dir = random_direction ();
 				mov_counter = 0;
         } in
@@ -155,22 +165,33 @@ open Lwt_js_events
         if creet.margin_top < -50. then (* la taille de l'image css *)
             ignore (change_status_randomly creet);
 
-        print_creet creet;
+        (*print_creet creet;*)
 
         creet
 	
-   let inc value = value + 1
+	let compute_creet_dir creet creets_list = 
+		let dir = match creet.status with
+	   	| Healthy | Berserk | Sick ->
+	       if  Random.int 100 <= 3 then
+	           random_direction ()
+		   else
+			   creet.dir
+	   	| Mean ->
+	       dir_nearest_creet creet creets_list
+		in
+		dir
+
 
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
-       let _ = match creet.status with
-	   | Healthy | Berserk | Sick ->
-		   Firebug.console##log (creet.mov_counter);
-	       if  Random.int 100 <= 3 then
-	           creet.dir <- random_direction ();
-	   | Mean ->
-	       creet.dir <- dir_nearest_creet creet creets_list;
+       let dir = compute_creet_dir creet creets_list in
+	   let _ = match creet.status with
+	   		| Healthy -> ignore ()
+	   		| Berserk -> ignore ()
+	   		| Sick -> ignore ()
+	   		| Mean -> ignore ()
 	   in
+	   creet.dir <- dir;
 	   move creet
         
     let log = Firebug.console##log (Js.string "This is one creet");
