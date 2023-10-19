@@ -18,14 +18,25 @@ open Creet
 
     let speed = ref 10.
 
-    let rec runner healthy_creets = 
-		let healthy, sick = List.partition (fun creet -> creet.status == Healthy) healthy_creets in
+    let rec runner creets_list = 
+		let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
         let healthy = List.map (fun creet -> Creet.update creet sick) healthy in
         let sick    = List.map (fun creet -> Creet.update creet healthy) sick in
 
-		let healthy_creets = sick @ healthy in
+		let creets_list = sick @ healthy in
+		(* Remove dead from div *)
+      	List.iter (fun creet ->
+      	    if creet.status == Dead && creet.state_counter == 0 then begin
+      	        Html.Manip.removeChild ~%bueno creet.elt;
+      	    end
+      	) creets_list;
+
+		let creets_list = List.filter (fun creet -> 
+			not (creet.status == Dead && creet.state_counter == 0)
+      	) creets_list in
+
         let%lwt () = Lwt_js.sleep 0.001 in
-        runner healthy_creets
+        runner creets_list
 	
 	let creet_init () =
           let creet = Creet.create () in

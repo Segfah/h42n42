@@ -5,7 +5,7 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Lwt_js_events
 
-    type state = Healthy | Sick | Berserk | Mean
+    type state = Healthy | Sick | Berserk | Mean | Dead
 
 	type direction = {
 			vertical: float;
@@ -21,15 +21,21 @@ open Lwt_js_events
         mutable size: float;
         mutable speed: float;
 		mutable dir: direction;
-		mutable mov_counter: int;
+		mutable state_counter: int;
     }
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
 
     let random_direction () =
         {
-			vertical   = if Random.int 100 <= 50 then -1. else 1.;
+			vertical   = if Random.int 100 <= 100 then -1. else 1.;
             horizontal = if Random.int 100 <= 50 then -1. else 1.;
+		}
+
+    let nul_direction () =
+        {
+			vertical   = 0.;
+            horizontal = 0.;
 		}
 	
 	let distance creet_one creet_two =
@@ -80,7 +86,7 @@ open Lwt_js_events
                 status = Healthy;
                 speed = 0.7;
 				dir = random_direction ();
-				mov_counter = 0;
+				state_counter = 0;
         } in
         (* Initialise dom css components 10 is default size in px *)
         creet.dom##.style##.height := _into_px creet.size;
@@ -97,6 +103,7 @@ open Lwt_js_events
             | Sick    -> "Sick"
             | Berserk -> "Berserk"
             | Mean    -> "Mean"
+            | Dead    -> "Dead"
         in
         let msg = Printf.sprintf "size: %f, margin_top: %f, margin_left: %f, status: %s" 
             creet.size creet.margin_top creet.margin_left status_str in
@@ -108,6 +115,7 @@ open Lwt_js_events
             | Sick -> "../images/maladev1.gif"
             | Berserk -> "../images/berserkv1.gif"
             | Mean -> "../images/deathv1.gif"
+            | Dead -> "../images/bombv1.gif"
         in
         creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
 
@@ -116,11 +124,11 @@ open Lwt_js_events
         match creet.status with
         | Healthy ->
             creet.speed <- creet.speed *. 0.85;
-            if chance < 00 then begin
+            creet.state_counter <- 800;
+            if chance < 80 then begin
                 creet.status <- Sick;
-                set_background_image creet;
-            end
-            else if chance < 00 then begin
+			end
+            else if chance < 90 then begin
                 creet.status <- Berserk;
                 set_background_image creet;
             end
@@ -132,7 +140,6 @@ open Lwt_js_events
             end;
             creet
         | _ -> creet  (* s'il est deja malade il ne change pas de status*)
-
 
     let move creet = 
         let next_margin_top = creet.margin_top +. creet.dir.vertical *. creet.speed in
@@ -164,9 +171,6 @@ open Lwt_js_events
 
         if creet.margin_top < -50. then (* la taille de l'image css *)
             ignore (change_status_randomly creet);
-
-        (*print_creet creet;*)
-
         creet
 	
 	let compute_creet_dir creet creets_list = 
@@ -177,21 +181,36 @@ open Lwt_js_events
 		   else
 			   creet.dir
 	   	| Mean ->
-	       dir_nearest_creet creet creets_list
+	       random_direction () (*dir_nearest_creet creet creets_list*)
+		| Dead ->
+           nul_direction ()
 		in
 		dir
 
+   let berserk_size creet =
+		if creet.state_counter mod 50 == 0 then
+		    creet.size <- creet.size *. 1.05;
+		    creet.dom##.style##.height := _into_px creet.size;
+		    creet.dom##.style##.width := _into_px creet.size;
+		Firebug.console##log (Js.string (Printf.sprintf "%f" creet.size))
 
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
        let dir = compute_creet_dir creet creets_list in
+	   creet.dir <- dir;
+
+	   creet.state_counter <- creet.state_counter - 1;
+       if creet.state_counter == 70 then (* tiempo para morir *)
+            creet.status <- Dead;
+            set_background_image creet;
+
 	   let _ = match creet.status with
 	   		| Healthy -> ignore ()
-	   		| Berserk -> ignore ()
-	   		| Sick -> ignore ()
+	   		| Berserk -> berserk_size creet
+	   		| Sick    -> ignore ()
 	   		| Mean -> ignore ()
+			| Dead -> ignore ()
 	   in
-	   creet.dir <- dir;
 	   move creet
         
     let log = Firebug.console##log (Js.string "This is one creet");
