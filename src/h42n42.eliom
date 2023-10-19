@@ -19,14 +19,18 @@ open Creet
     let speed = ref 10.
 
     let rec runner creet_list = 
-    (*  *)
-        (* Add/remove creet *)
-        (* Change status *)
-        (* Move creets *)
-        (* List.map (fun creet -> Creet.move creet) creet_list; *)
-        List.iter (fun creet -> ignore (Creet.update creet)) !creet_list;
-        let%lwt () = Lwt_js.sleep 0.008 in
-        runner creet_list
+      List.iter (fun creet ->
+          if creet.status == Dead && creet.state_counter == 0 then begin
+              Html.Manip.removeChild ~%bueno creet.elt;
+          end
+      ) !creet_list;
+        (* Filtrar creets con estado Dead de la lista *)
+      creet_list := List.filter (fun creet -> 
+        not (creet.status == Dead && creet.state_counter == 0)
+      ) !creet_list;
+      List.iter (fun creet -> ignore (Creet.update creet)) !creet_list;
+        let%lwt () = Lwt_js.sleep 0.001 in
+      runner creet_list
 
     let play () =
       Random.self_init();
