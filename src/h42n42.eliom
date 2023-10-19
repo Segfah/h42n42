@@ -16,27 +16,47 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Creet
 
-    let speed = ref 10.
+  let speed = ref 10.
 
-    let rec runner creets_list = 
-		let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
-        let healthy = List.map (fun creet -> Creet.update creet sick) healthy in
-        let sick    = List.map (fun creet -> Creet.update creet healthy) sick in
+  (* ------------  RUNNER ------------   *)
 
-		let creets_list = sick @ healthy in
-		(* Remove dead from div *)
-      	List.iter (fun creet ->
-      	    if creet.status == Dead && creet.state_counter == 0 then begin
-      	        Html.Manip.removeChild ~%bueno creet.elt;
-      	    end
-      	) creets_list;
+  (* Met à jour le statut de chaque 'creet' en fonction de sa santé actuelle. *)
+  let updateStatuses creets_list =
+      let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
+      let updated_healthy = List.map (fun creet -> Creet.update creet sick) healthy in
+      let updated_sick = List.map (fun creet -> Creet.update creet healthy) sick in
+      updated_sick @ updated_healthy
 
-		let creets_list = List.filter (fun creet -> 
-			not (creet.status == Dead && creet.state_counter == 0)
-      	) creets_list in
+  (* Retire de la div les 'creets' qui sont morts. *)
+  let removeDead creets_list =
+      List.iter (fun creet ->
+          if creet.status == Dead && creet.state_counter == 0 then
+              Html.Manip.removeChild ~%bueno creet.elt;
+      ) creets_list;
+      List.filter (fun creet -> 
+          not (creet.status == Dead && creet.state_counter == 0)
+      ) creets_list
 
-        let%lwt () = Lwt_js.sleep 0.001 in
-        runner creets_list
+  (* Affiche un message sur l'écran quand tous les 'creets' sont partis. *)
+  let displayLostMessage () =
+      let overlay = div ~a:[a_class ["perdiste-overlay"]] [] in
+      let text = div ~a:[a_class ["perdiste-text"]] [txt "Perdiste"] in
+      Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_div text);
+      Dom.appendChild (Dom_html.document##.body) (Html.To_dom.of_div overlay)
+
+  let rec runner creets_list = 
+      let updated_list = updateStatuses creets_list in
+      let remaining_creet_list = removeDead updated_list in
+
+      if remaining_creet_list = [] then begin
+          displayLostMessage ();
+          Lwt.return_unit
+      end else begin
+          let%lwt () = Lwt_js.sleep 0.001 in
+          runner remaining_creet_list
+      end
+
+  (* ------------  FIN RUNNER ------------   *)
 	
 	let creet_init () =
           let creet = Creet.create () in
@@ -56,7 +76,7 @@ open Creet
 
       Lwt.async (fun () -> runner list)
 
-
+  (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =
     let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in
 

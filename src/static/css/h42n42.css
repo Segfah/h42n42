@@ -78,14 +78,34 @@ body {
     animation: rippleEffect 6s ease infinite;
 }
 
-.death-cross {
-    width: 10%; /* Ajusta este valor según la necesidad */
-    height: auto; /* Esto mantiene la relación de aspecto de la imagen */
-    display: block; /* Para garantizar que la imagen se trate como un bloque y se centre correctamente si se necesita */
-    /* Esto centrará la imagen horizontalmente dentro del div */
-    /* transform: scaleX(-1) */
-    /* margin-left: 732px; (max) */
+@keyframes moveFromRightToLeft {
+    0% {
+        transform: translateX(calc(0% + 10%)) scaleX(1);  /* Inicio: en el borde derecho con orientación original */
+    }
+    48% {
+        transform: translateX(900%) scaleX(1); /* Casi llegando al extremo izquierdo, mantiene orientación original */
+    }
+    50% {
+        transform: translateX(900%) scaleX(-1); /* Al llegar al extremo izquierdo se voltea instantáneamente */
+    }
+    98% {
+        transform: translateX(calc(0% + 10%)) scaleX(-1);  /* Casi llegando al borde derecho manteniendo la orientación volteada */
+    }
+    100% {
+        transform: translateX(calc(0% + 10%)) scaleX(1);  /* Al llegar al borde derecho vuelve a su orientación original instantáneamente */
+    }
 }
+
+
+
+
+.death-cross {
+    width: 10%;
+    height: auto;
+    display: block;
+    animation: moveFromRightToLeft 10s linear infinite;
+}
+
 
 /* FIN river */
 
@@ -153,4 +173,23 @@ body {
     color: #777;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+.perdiste-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 0.7); /* Gris con transparencia */
+    z-index: 1000; /* Asegurar que se muestra encima de otros elementos */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.perdiste-text {
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
 }
