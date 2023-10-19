@@ -16,26 +16,26 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Creet
 
-	let speed = ref 10.
+    let speed = ref 10.
 
-	let rec runner creet_list = 
+    let rec runner creet_list = 
     (*  *)
-		(* Add/remove creet *)
-		(* Change status *)
-		(* Move creets *)
-		(* List.map (fun creet -> Creet.move creet) creet_list; *)
-    List.iter (fun creet -> ignore (Creet.move creet)) !creet_list;
-		let%lwt () = Lwt_js.sleep 0.01 in
-		runner creet_list
+        (* Add/remove creet *)
+        (* Change status *)
+        (* Move creets *)
+        (* List.map (fun creet -> Creet.move creet) creet_list; *)
+        List.iter (fun creet -> ignore (Creet.update creet)) !creet_list;
+        let%lwt () = Lwt_js.sleep 0.008 in
+        runner creet_list
 
-	let play () =
-	  Random.self_init();
-	  let creet_list = ref [] in
-	  for _ = 1 to 4 do
-      	let creet = Creet.create () in
-	  	Html.Manip.appendChild ~%bueno creet.elt;
-      	creet_list := creet :: !creet_list;
-	  done;
+    let play () =
+      Random.self_init();
+      let creet_list = ref [] in
+      for _ = 1 to 4 do
+          let creet = Creet.create () in
+          Html.Manip.appendChild ~%bueno creet.elt;
+          creet_list := creet :: !creet_list;
+      done;
 
     (* si tu veux tester un creat qui ne se deplace pas *)
     (*
@@ -43,8 +43,8 @@ open Creet
     Html.Manip.appendChild ~%bueno ptrp.elt;
     *)
 
-	  (* List.iter (add_creet) creet_list; *)
-	  Lwt.async (fun () -> runner creet_list)
+      (* List.iter (add_creet) creet_list; *)
+      Lwt.async (fun () -> runner creet_list)
 
 
   let attach_start_event () =
