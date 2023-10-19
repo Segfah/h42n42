@@ -28,7 +28,7 @@ open Lwt_js_events
 
     let random_direction () =
         {
-			vertical   = if Random.int 100 <= 50 then -1. else 1.;
+			vertical   = if Random.int 100 <= 100 then -1. else 1.;
             horizontal = if Random.int 100 <= 50 then -1. else 1.;
 		}
 
@@ -97,7 +97,7 @@ open Lwt_js_events
             creet.speed <- creet.speed *. 0.85;
             creet.state_counter <- 800;
             if chance < 80 then begin
-                creet.status <- Sick;
+                creet.status <- Berserk;
                 set_background_image creet;
             end
             else if chance < 90 then begin
@@ -148,18 +148,26 @@ open Lwt_js_events
         if creet.state_counter == 70 then (* tiempo para morir *)
             creet.status <- Dead;
             set_background_image creet;
-        
-        print_creet creet;
+        (* print_creet creet; *)
 
         creet
 	
    let inc value = value + 1
+
+    let berserk_size creet =
+        if creet.state_counter mod 50 == 0 then
+            creet.size <- creet.size *. 1.05;
+            creet.dom##.style##.height := _into_px creet.size;
+            creet.dom##.style##.width := _into_px creet.size;
+        Firebug.console##log (Js.string (Printf.sprintf "%f" creet.size))
 
    let update creet = 
        let _ = match creet.status with
 	   | Healthy | Berserk | Sick ->
 	       if  Random.int 100 <= 3 then
 	           creet.dir <- random_direction ();
+            if creet.status = Berserk then 
+                berserk_size creet;
 	   | Mean ->
 	       creet.dir <- find_nearest_creet ();
 	   | Dead ->
