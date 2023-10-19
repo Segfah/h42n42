@@ -42,3 +42,4 @@ _build/
 # Generated javascript files
 src/local/var/www/h42n42/eliom/
 src/_client
+src/_deps
