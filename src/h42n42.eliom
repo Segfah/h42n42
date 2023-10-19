@@ -20,7 +20,7 @@ open Creet
 
   (* ------------  RUNNER ------------   *)
 
-  (* Met à jour le statut de chaque 'creet' en fonction de sa santé actuelle. *)
+  (* Met à jour le statut de chaque 'creet' en fonction de sa santé. *)
   let updateStatuses creets_list =
       let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
       let updated_healthy = List.map (fun creet -> Creet.update creet sick) healthy in
@@ -37,11 +37,24 @@ open Creet
           not (creet.status == Dead && creet.state_counter == 0)
       ) creets_list
 
-  (* Affiche un message sur l'écran quand tous les 'creets' sont partis. *)
   let displayLostMessage () =
       let overlay = div ~a:[a_class ["perdiste-overlay"]] [] in
+      let imagen = img ~a:[a_class ["virus-gif"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "virus.gif"]) ~alt:"Virus" () in
       let text = div ~a:[a_class ["perdiste-text"]] [txt "Perdiste"] in
+      let button_clone = div ~a:[a_class ["button-start"]] [txt "Volver a Jugar"] in
+
+      let removeOverlayAndClass _ = 
+          Dom.removeChild (Dom_html.document##.body) (Html.To_dom.of_div overlay);
+          (match Dom_html.getElementById_opt "start-button" with
+          | None -> ()
+          | Some btn -> btn##.classList##remove (Js.string "button-des"));
+          Js._true
+      in
+
+      (Html.To_dom.of_div button_clone)##.onclick := Dom_html.handler removeOverlayAndClass;
+      Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_img imagen);
       Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_div text);
+      Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_div button_clone);
       Dom.appendChild (Dom_html.document##.body) (Html.To_dom.of_div overlay)
 
   let rec runner creets_list = 
@@ -70,12 +83,12 @@ open Creet
 	  (* This creet is created just to test Mean *)
 	  (* The function change status has been modified to forcefully create mean *)
       let screet = Creet.create () in
-	  let screet = Creet.change_status_randomly screet in
-      let list = list @ [screet] in
-      Html.Manip.appendChild ~%bueno screet.elt;
+      let screet = Creet.change_status_randomly screet in
+        let list = list @ [screet] in
+        Html.Manip.appendChild ~%bueno screet.elt;
 
-      Lwt.async (fun () -> runner list)
-
+        Lwt.async (fun () -> runner list)
+    
   (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =
     let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in

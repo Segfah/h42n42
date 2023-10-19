@@ -40,13 +40,7 @@ body {
 .title {
     text-align: center;
     color: var(--color-gray);
-    font-size: 20px;
-}
-
-.title {
-    text-align: center;
-    color: var(--color-gray);
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .container {
@@ -96,16 +90,12 @@ body {
     }
 }
 
-
-
-
 .death-cross {
     width: 10%;
     height: auto;
     display: block;
     animation: moveFromRightToLeft 10s linear infinite;
 }
-
 
 /* FIN river */
 
@@ -148,7 +138,7 @@ body {
     display: inline-block;
     padding: 10px 20px;
     background-color: #3498db;
-    color: white;
+    color: var(--color-white);
     border: none;
     border-radius: 25px;
     cursor: pointer;
@@ -181,9 +171,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(128, 128, 128, 0.7); /* Gris con transparencia */
-    z-index: 1000; /* Asegurar que se muestra encima de otros elementos */
+    background-color: rgb(247 52 52 / 70%);
+    z-index: 1000;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -191,5 +182,12 @@ body {
 .perdiste-text {
     font-size: 50px;
     font-weight: bold;
-    color: white;
+    color: var(--color-white);
+    margin-bottom: 20px;
+}
+
+.virus-gif {
+    width: 10%;
+    height: auto;
+    display: block;
 }

@@ -84,7 +84,7 @@ open Lwt_js_events
                 margin_top  = Random.float (620. -. size);
                 margin_left = Random.float (800. -. size);
                 status = Healthy;
-                speed = 0.7;
+                speed = 0.5;
 				dir = random_direction ();
 				state_counter = 0;
         } in
