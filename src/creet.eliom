@@ -28,15 +28,12 @@ open Lwt_js_events
 
     let random_direction () =
         {
-			vertical   = if Random.int 100 <= 100 then -1. else 1.;
+			vertical   = if Random.int 100 <= 50 then -1. else 1.;
             horizontal = if Random.int 100 <= 50 then -1. else 1.;
 		}
 
-    let nul_direction () =
-        {
-			vertical   = 0.;
-            horizontal = 0.;
-		}
+    let nul_direction () = { vertical = 0.; horizontal = 0. }
+
 	
 	let distance creet_one creet_two =
 	    let x = creet_one.margin_top -. creet_two.margin_top in
