@@ -32,13 +32,32 @@ open Lwt_js_events
             horizontal = if Random.int 100 <= 50 then -1. else 1.;
 		}
 	
-	let find_nearest_creet () =
+	let distance creet_one creet_two =
+	    let x = creet_one.margin_top -. creet_two.margin_top in
+	    let y = creet_one.margin_left -. creet_two.margin_left in
+		let dist = Float.sqrt (x *. x +. y *. y) in
+		dist
+	
+	let rec find x lst =
+    	match lst with
+    	| [] -> raise (Failure "Not Found")
+    	| h :: t -> if x = h then 0 else 1 + find x t
+
+	let min_list lst = List.fold_left min (List.hd lst) (List.tl lst)
+	
+	let dir_nearest_creet creet creets_list =
+		let distances = List.map(distance creet) creets_list in
+		let min_dist = min_list distances in
+		let index = find min_dist distances in
+		let nearest = List.nth creets_list index in
+		let x = nearest.margin_top -. creet.margin_top in
+		let y = nearest.margin_left -. creet.margin_left in
 	    let dir = {
-				vertical = 1.;
-				horizontal = 1.;
+				vertical   = x /. min_dist;
+				horizontal = y /. min_dist;
 		} in 
 		dir
-
+	
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
         let size = 50. in
@@ -87,11 +106,11 @@ open Lwt_js_events
         match creet.status with
         | Healthy ->
             creet.speed <- creet.speed *. 0.85;
-            if chance < 80 then begin
+            if chance < 00 then begin
                 creet.status <- Sick;
                 set_background_image creet;
             end
-            else if chance < 90 then begin
+            else if chance < 00 then begin
                 creet.status <- Berserk;
                 set_background_image creet;
             end
@@ -142,14 +161,15 @@ open Lwt_js_events
 	
    let inc value = value + 1
 
-   let update creet = 
+   (* Creet list contains either sick or helthy creets depending on the creet state *)
+   let update creet creets_list = 
        let _ = match creet.status with
 	   | Healthy | Berserk | Sick ->
 		   Firebug.console##log (creet.mov_counter);
 	       if  Random.int 100 <= 3 then
 	           creet.dir <- random_direction ();
 	   | Mean ->
-	       creet.dir <- find_nearest_creet ();
+	       creet.dir <- dir_nearest_creet creet creets_list;
 	   in
 	   move creet
         
