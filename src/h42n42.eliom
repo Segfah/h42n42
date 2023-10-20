@@ -16,6 +16,12 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Creet
 
+	let creet_init () = (
+      let creet = Creet.create () in
+      Html.Manip.appendChild ~%bueno creet.elt;
+		  creet
+  )
+
   (* ------------  RUNNER ------------   *)
 
   (* Met à jour le statut de chaque 'creet' en fonction de sa santé. *)
@@ -23,6 +29,7 @@ open Creet
       let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
       let updated_healthy = List.map (fun creet -> Creet.update creet sick) healthy in
       let updated_sick = List.map (fun creet -> Creet.update creet healthy) sick in
+
       updated_sick @ updated_healthy
 
   (* Retire de la div les 'creets' qui sont morts. *)
@@ -55,37 +62,40 @@ open Creet
       Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_div button_clone);
       Dom.appendChild (Dom_html.document##.body) (Html.To_dom.of_div overlay)
 
-  let rec runner creets_list = 
+  let rec runner creets_list timestamp = 
       let updated_list = updateStatuses creets_list in
       let remaining_creet_list = removeDead updated_list in
-
+      let healthy_count = List.fold_left (fun acc c -> if c.status == Creet.Healthy then acc + 1 else acc) 0 remaining_creet_list in
+      let remaining_creet_list = 
+          if healthy_count > 0 && (List.length remaining_creet_list) < 10 && timestamp mod 1000 == 0 then
+              remaining_creet_list @ [creet_init ()]
+          else
+              remaining_creet_list
+      in
       if remaining_creet_list = [] then begin
           displayLostMessage ();
           Lwt.return_unit
       end else begin
           let%lwt () = Lwt_js.sleep 0.001 in
-          runner remaining_creet_list
+          runner remaining_creet_list (timestamp + 1)
       end
 
   (* ------------  FIN RUNNER ------------   *)
 	
-	let creet_init () =
-          let creet = Creet.create () in
-          Html.Manip.appendChild ~%bueno creet.elt;
-		  creet
 
-    let play () =
-      Random.self_init();
-      let list = List.init 4 (fun _ -> creet_init ()) in
 
-	  (* This creet is created just to test Mean *)
-	  (* The function change status has been modified to forcefully create mean *)
-      let screet = Creet.create () in
-      let screet = Creet.change_status_randomly screet in
-      let list = list @ [screet] in
-      Html.Manip.appendChild ~%bueno screet.elt;
+  let play () =
+    Random.self_init();
+    let list = List.init 4 (fun _ -> creet_init ()) in
 
-      Lwt.async (fun () -> runner list)
+  (* This creet is created just to test Mean *)
+  (* The function change status has been modified to forcefully create mean *)
+    let screet = Creet.create () in
+    let screet = Creet.change_status_randomly screet in
+    let list = list @ [screet] in
+    Html.Manip.appendChild ~%bueno screet.elt;
+
+    Lwt.async (fun () -> runner list 0)
     
   (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =
