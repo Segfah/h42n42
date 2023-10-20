@@ -16,8 +16,6 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Creet
 
-  let speed = ref 10.
-
   (* ------------  RUNNER ------------   *)
 
   (* Met à jour le statut de chaque 'creet' en fonction de sa santé. *)
@@ -84,10 +82,10 @@ open Creet
 	  (* The function change status has been modified to forcefully create mean *)
       let screet = Creet.create () in
       let screet = Creet.change_status_randomly screet in
-        let list = list @ [screet] in
-        Html.Manip.appendChild ~%bueno screet.elt;
+      let list = list @ [screet] in
+      Html.Manip.appendChild ~%bueno screet.elt;
 
-        Lwt.async (fun () -> runner list)
+      Lwt.async (fun () -> runner list)
     
   (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =

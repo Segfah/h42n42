@@ -26,9 +26,24 @@ open Lwt_js_events
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
 
-    let random_direction () =
-        {
-			vertical   = if Random.int 100 <= 50 then -1. else 1.;
+	let default_speed = 0.5
+
+	let update_size creet size =
+		creet.size <- size;
+		creet.dom##.style##.height := _into_px creet.size;
+		creet.dom##.style##.width := _into_px creet.size
+
+    let random_direction creet =
+        let vertical_chances = match creet with 
+			| None -> 50
+			| Some creet ->
+				match creet.status with
+				| Healthy -> 55
+				| Berserk -> 0
+				| _ -> 50
+		in
+		{
+			vertical   = if Random.int 100 <= vertical_chances then -1. else 1.;
             horizontal = if Random.int 100 <= 50 then -1. else 1.;
 		}
 
@@ -54,21 +69,29 @@ open Lwt_js_events
 	let min_list lst = List.fold_left min (List.hd lst) (List.tl lst)
 	
 	let find_nearest_creet creet creets_list =
-		let distances = List.map(distance creet) creets_list in
-		let min_dist = min_list distances in
-		let index = find min_dist distances in
-		let nearest = List.nth creets_list index in
-		nearest
+		if List.length creets_list == 0 then
+			None
+		else begin
+			let distances = List.map(distance creet) creets_list in
+			let min_dist = min_list distances in
+			let index = find min_dist distances in
+			let nearest = List.nth creets_list index in
+			Some nearest
+		end
 
 	let dir_nearest_creet creet creets_list =
-		let nearest = find_nearest_creet creet creets_list in
-		let distance = distance creet nearest in
-		let x = nearest.margin_top -. creet.margin_top in
-		let y = nearest.margin_left -. creet.margin_left in
-	    let dir = {
-				vertical   = x /. distance;
-				horizontal = y /. distance;
-		} in 
+		let nearest_opt = find_nearest_creet creet creets_list in
+		let dir = match nearest_opt with
+			| None -> random_direction (Some creet)
+			| Some nearest ->
+				let distance = distance creet nearest in
+				let x = nearest.margin_top -. creet.margin_top in
+				let y = nearest.margin_left -. creet.margin_left in
+	    		{
+						vertical   = x /. distance;
+						horizontal = y /. distance;
+				} 
+		in
 		dir
 	
     let create () = 
@@ -81,8 +104,8 @@ open Lwt_js_events
                 margin_top  = Random.float (620. -. size);
                 margin_left = Random.float (800. -. size);
                 status = Healthy;
-                speed = 0.5;
-				dir = random_direction ();
+                speed = default_speed;
+				dir = random_direction None;
 				state_counter = 0;
         } in
         (* Initialise dom css components 10 is default size in px *)
@@ -111,7 +134,7 @@ open Lwt_js_events
             | Healthy -> "../images/run_sonic.gif"
             | Sick -> "../images/maladev1.gif"
             | Berserk -> "../images/berserkv1.gif"
-            | Mean -> "../images/deathv1.gif"
+            | Mean -> "../images/robotnic.gif"
             | Dead -> "../images/bombv1.gif"
         in
         creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
@@ -132,13 +155,15 @@ open Lwt_js_events
             else begin
                 creet.status <- Mean;
 				(* Reduce mean creet size by 15% *)
-				creet.size <- creet.size *. 0.85;
+				update_size creet (creet.size *. 0.85);
+				creet.speed<- default_speed *. 1.10;
                 set_background_image creet;
             end;
             creet
         | _ -> creet  (* s'il est deja malade il ne change pas de status*)
 
-    let move creet = 
+
+	let move creet = 
         let next_margin_top = creet.margin_top +. creet.dir.vertical *. creet.speed in
         let next_margin_left = creet.margin_left +. creet.dir.horizontal *. creet.speed in
 
@@ -155,14 +180,6 @@ open Lwt_js_events
 		else
         	creet.margin_left <- creet.margin_left +. creet.dir.horizontal *. creet.speed;
 
-
-		(*
-        *creet.margin_top  <- Float.min creet.margin_top (620. -. creet.size);
-        *creet.margin_top  <- Float.max creet.margin_top (-80.);
-        *creet.margin_left <- Float.min creet.margin_left (800. -. creet.size);
-        *creet.margin_left <- Float.max creet.margin_left (0.);
-		*)
-
         creet.dom##.style##.marginTop  := _into_px creet.margin_top;
         creet.dom##.style##.marginLeft := _into_px creet.margin_left;
 
@@ -174,11 +191,11 @@ open Lwt_js_events
 		let dir = match creet.status with
 	   	| Healthy | Berserk | Sick ->
 	       if  Random.int 100 <= 3 then
-	           random_direction ()
+	           random_direction (Some creet)
 		   else
 			   creet.dir
 	   	| Mean ->
-	       random_direction () (*dir_nearest_creet creet creets_list*)
+	       dir_nearest_creet creet creets_list
 		| Dead ->
            nul_direction ()
 		in
@@ -186,30 +203,32 @@ open Lwt_js_events
 
    let berserk_size creet =
 		if creet.state_counter mod 50 == 0 then
-		    creet.size <- creet.size *. 1.05;
-		    creet.dom##.style##.height := _into_px creet.size;
-		    creet.dom##.style##.width := _into_px creet.size;
+			update_size creet (creet.size *. 1.05);
 		Firebug.console##log (Js.string (Printf.sprintf "%f" creet.size))
 
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
-       let dir = compute_creet_dir creet creets_list in
-	   creet.dir <- dir;
-
 	   creet.state_counter <- creet.state_counter - 1;
        if creet.state_counter == 70 then (* tiempo para morir *)
             creet.status <- Dead;
             set_background_image creet;
 
 	   let _ = match creet.status with
-	   		| Healthy -> ignore ()
+	   		| Healthy -> 
+				let nearest = find_nearest_creet creet creets_list in
+				let intersect = match nearest with
+					| None -> false
+					| Some c -> intersect creet c
+				in
+				if intersect == true then
+            		ignore (change_status_randomly creet)
 	   		| Berserk -> berserk_size creet
 	   		| Sick    -> ignore ()
 	   		| Mean -> ignore ()
 			| Dead -> ignore ()
 	   in
+       let dir = compute_creet_dir creet creets_list in
+	   creet.dir <- dir;
 	   move creet
         
-    let log = Firebug.console##log (Js.string "This is one creet");
-    
 (**)]
