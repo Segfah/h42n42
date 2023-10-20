@@ -22,6 +22,7 @@ open Lwt_js_events
         mutable speed: float;
 		mutable dir: direction;
 		mutable state_counter: int;
+		mutable probability: float;
     }
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
@@ -35,16 +36,16 @@ open Lwt_js_events
 
     let random_direction creet =
         let vertical_chances = match creet with 
-			| None -> 50
+			| None -> 50.
 			| Some creet ->
 				match creet.status with
-				| Healthy -> 55
-				| Berserk -> 0
-				| _ -> 50
+				| Healthy -> creet.probability
+				| Berserk -> 40.
+				| _ -> 50.
 		in
 		{
-			vertical   = if Random.int 100 <= vertical_chances then -1. else 1.;
-            horizontal = if Random.int 100 <= 50 then -1. else 1.;
+			vertical   = if Random.float 100. <= vertical_chances then -1. else 1.;
+            horizontal = if Random.float 100. <= 50. then -1. else 1.;
 		}
 
     let nul_direction () = { vertical = 0.; horizontal = 0. }
@@ -107,6 +108,7 @@ open Lwt_js_events
                 speed = default_speed;
 				dir = random_direction None;
 				state_counter = 0;
+				probability = 50.;
         } in
         (* Initialise dom css components 10 is default size in px *)
         creet.dom##.style##.height := _into_px creet.size;
@@ -203,17 +205,21 @@ open Lwt_js_events
 
    let berserk_size creet =
 		if creet.state_counter mod 50 == 0 then
-			update_size creet (creet.size *. 1.05);
-		Firebug.console##log (Js.string (Printf.sprintf "%f" creet.size))
+			update_size creet (creet.size *. 1.05)
+
 	
-	let update_speed creet =
+	let update_speed_and_probability creet =
 		if creet.state_counter mod 1000 == 0 then
-			creet.speed <- creet.speed *. 1.10
+			creet.speed <- creet.speed *. 1.10;
+			creet.probability <- creet.probability *. 1.0001;
+			Firebug.console##log (Js.string (Printf.sprintf "%f" creet.probability))
+
+
 
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
 	   creet.state_counter <- creet.state_counter - 1;
-	   update_speed creet;
+	   update_speed_and_probability creet;
        if creet.state_counter == 70 then (* tiempo para morir *)
             creet.status <- Dead;
             set_background_image creet;
