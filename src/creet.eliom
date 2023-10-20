@@ -205,10 +205,15 @@ open Lwt_js_events
 		if creet.state_counter mod 50 == 0 then
 			update_size creet (creet.size *. 1.05);
 		Firebug.console##log (Js.string (Printf.sprintf "%f" creet.size))
+	
+	let update_speed creet =
+		if creet.state_counter mod 1000 == 0 then
+			creet.speed <- creet.speed *. 1.10
 
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
 	   creet.state_counter <- creet.state_counter - 1;
+	   update_speed creet;
        if creet.state_counter == 70 then (* tiempo para morir *)
             creet.status <- Dead;
             set_background_image creet;
