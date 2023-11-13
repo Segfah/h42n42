@@ -194,3 +194,15 @@ body {
     height: auto;
     display: block;
 }
+
+.parameters-containers {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+}
+
+.speed-checkbox, .speed-checkbox2 {
+    padding: 2px;
+    margin: 10px;
+  }

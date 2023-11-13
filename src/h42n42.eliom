@@ -6,8 +6,19 @@ open Js_of_ocaml
 
 let bueno = div ~a:[a_class ["bueno"]] []
 let start_button = div ~a:[a_class ["button-start"]; a_id "start-button"] [txt "JUGAR"]
+let speed_checkbox =
+  div ~a:[a_class ["parameters-containers"]] [
+    div ~a:[a_class ["speed-checkbox"]] [
+        input ~a:[a_input_type `Checkbox; a_name "speedCheckbox"; a_id "speedCheckbox"] ();
+        label ~a:[a_label_for "speedCheckbox"] [txt "Speed x2"];
+      ];
+    div ~a:[a_class ["speed-checkbox2"]] [
+        input ~a:[a_input_type `Checkbox; a_name "myCheckbox2"; a_id "myCheckbox2"] ();
+        label ~a:[a_label_for "myCheckbox2"] [txt "Monstruo enfermo"];
+      ]
+  ]
 ]
-
+ 
 [%%client
 open Eliom_lib
 open Eliom_content
@@ -100,16 +111,23 @@ open Creet
   (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =
     let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in
+    let scheckbox = Dom_html.getElementById_coerce "speedCheckbox" Dom_html.CoerceTo.input in
 
-    match button with
-    | None -> ()
-    | Some btn -> 
-      btn##.onclick := Dom_html.handler (fun _ -> 
+    match (button, scheckbox) with
+    | (Some btn, Some chk) ->
+      btn##.onclick := Dom_html.handler (fun _ ->
         let () = Firebug.console##log (Js.string "clic") in
         btn##.classList##add (Js.string "button-des");
         play ();
+    
+        (*
+        set_default_speed (if Js.to_bool chk##.checked then 1.1 else 0.5);
+        let speed_value = get_default_speed () in
+        Firebug.console##log (Js.string ("default_speed: " ^ string_of_float speed_value));
+        *)
         Js._true
       )
+    | _ -> ()
 
   let () = attach_start_event ()
 
@@ -156,6 +174,7 @@ let page =
         h1 [txt "H42N42"]
       ];
       start_button;
+      speed_checkbox;
       board;
     ]
   ]
