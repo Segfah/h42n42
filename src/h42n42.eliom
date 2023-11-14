@@ -10,11 +10,11 @@ let params_checkbox =
   div ~a:[a_class ["parameters-containers"]] [
     div ~a:[a_class ["speed-checkbox"]] [
         input ~a:[a_input_type `Checkbox; a_name "speedCheckbox"; a_id "speedCheckbox"] ();
-        label ~a:[a_label_for "speedCheckbox"] [txt "Speed x2"];
+        label ~a:[a_label_for "speedCheckbox"] [txt "Velocidad x2"];
       ];
     div ~a:[a_class ["sick_checkbox"]] [
         input ~a:[a_input_type `Checkbox; a_name "sickCheckbox"; a_id "sickCheckbox"] ();
-        label ~a:[a_label_for "sickCheckbox"] [txt "sick character"];
+        label ~a:[a_label_for "sickCheckbox"] [txt "Personaje enfermo"];
       ]
   ]
 ]

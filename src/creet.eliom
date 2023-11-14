@@ -15,6 +15,7 @@ open Lwt_js_events
     type creet = {
         elt: Html_types.div elt;
         dom : Dom_html.divElement Js.t;
+		mutable grab : bool;
         mutable status: state;
         mutable margin_top: float;
         mutable margin_left: float;
@@ -27,7 +28,7 @@ open Lwt_js_events
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
 
-	let default_speed = 0.5
+	let default_speed = 0.2
 
 	let update_size creet size =
 		creet.size <- size;
@@ -94,7 +95,36 @@ open Lwt_js_events
 				} 
 		in
 		dir
-	
+
+		let event_mouse creet event =
+			Firebug.console##log event;
+			let radius = creet.size /. 2. in
+
+
+			let top = float_of_int event##.clientY in
+			let left = float_of_int event##.clientX in
+
+
+			creet.margin_left <- left;
+			creet.margin_top <- top;
+
+			creet.dom##.style##.marginLeft := _into_px creet.margin_left;
+			creet.dom##.style##.marginTop := _into_px creet.margin_top
+
+		let _handle_events creet mouse_down _ =
+		creet.grab <- false;
+		event_mouse creet mouse_down;
+		Lwt.pick
+			[
+			mousemoves Dom_html.document (fun mouse_move _ ->
+				event_mouse creet mouse_move;
+				Lwt.return ());
+			(let%lwt mouse_up = mouseup Dom_html.document in
+			event_mouse creet mouse_up;
+			creet.grab <- true;
+			Lwt.return ());
+			]
+
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
         let size = 50. in
@@ -102,6 +132,7 @@ open Lwt_js_events
                 elt;
                 dom = Html.To_dom.of_div elt;
                 size;
+				grab = false;
                 margin_top  = Random.float (620. -. size);
                 margin_left = Random.float (800. -. size);
                 status = Healthy;
@@ -114,9 +145,9 @@ open Lwt_js_events
         creet.dom##.style##.height := _into_px creet.size;
         creet.dom##.style##.width  := _into_px creet.size;
 
-        creet.dom##.style##.marginTop := _into_px creet.margin_top;
+		creet.dom##.style##.marginTop := _into_px creet.margin_top;
         creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-
+		Lwt.async (fun () -> mousedowns creet.dom (_handle_events creet));
         creet
     
     let print_creet creet = 
@@ -211,8 +242,8 @@ open Lwt_js_events
 	let update_speed_and_probability creet =
 		if creet.state_counter mod 1000 == 0 then
 			creet.speed <- creet.speed *. 1.10;
-			creet.probability <- creet.probability *. 1.0001;
-			Firebug.console##log (Js.string (Printf.sprintf "%f" creet.probability))
+			creet.probability <- creet.probability *. 1.0001
+			
 
 
 
