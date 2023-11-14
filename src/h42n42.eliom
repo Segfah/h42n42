@@ -6,15 +6,15 @@ open Js_of_ocaml
 
 let bueno = div ~a:[a_class ["bueno"]] []
 let start_button = div ~a:[a_class ["button-start"]; a_id "start-button"] [txt "JUGAR"]
-let speed_checkbox =
+let params_checkbox =
   div ~a:[a_class ["parameters-containers"]] [
     div ~a:[a_class ["speed-checkbox"]] [
         input ~a:[a_input_type `Checkbox; a_name "speedCheckbox"; a_id "speedCheckbox"] ();
         label ~a:[a_label_for "speedCheckbox"] [txt "Speed x2"];
       ];
-    div ~a:[a_class ["speed-checkbox2"]] [
-        input ~a:[a_input_type `Checkbox; a_name "myCheckbox2"; a_id "myCheckbox2"] ();
-        label ~a:[a_label_for "myCheckbox2"] [txt "Monstruo enfermo"];
+    div ~a:[a_class ["sick_checkbox"]] [
+        input ~a:[a_input_type `Checkbox; a_name "sickCheckbox"; a_id "sickCheckbox"] ();
+        label ~a:[a_label_for "sickCheckbox"] [txt "sick character"];
       ]
   ]
 ]
@@ -94,37 +94,34 @@ open Creet
   (* ------------  FIN RUNNER ------------   *)
 	
 
-
-  let play () =
+  let play ~is_sick_active =
     Random.self_init();
-    let list = List.init 4 (fun _ -> creet_init ()) in
+    let list_ref = ref (List.init 4 (fun _ -> creet_init ())) in
+    if is_sick_active then begin
+      let modified_screet = Creet.create () |> Creet.change_status_randomly in
+      Html.Manip.appendChild ~%bueno modified_screet.elt;
+      list_ref := modified_screet :: !list_ref;
+    end;
 
-  (* This creet is created just to test Mean *)
-  (* The function change status has been modified to forcefully create mean *)
-    let screet = Creet.create () in
-    let screet = Creet.change_status_randomly screet in
-    let list = list @ [screet] in
-    Html.Manip.appendChild ~%bueno screet.elt;
-
-    Lwt.async (fun () -> runner list 0)
+    Lwt.async (fun () -> runner !list_ref 1)
     
   (* Attache un événement de clic au bouton de démarrage *)
   let attach_start_event () =
     let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in
     let scheckbox = Dom_html.getElementById_coerce "speedCheckbox" Dom_html.CoerceTo.input in
+    let sick_checkbox = Dom_html.getElementById_coerce "sickCheckbox" Dom_html.CoerceTo.input in
 
-    match (button, scheckbox) with
-    | (Some btn, Some chk) ->
+    match (button, scheckbox, sick_checkbox) with
+    | (Some btn, Some chk, Some sick_chk) ->
       btn##.onclick := Dom_html.handler (fun _ ->
+        let is_sick_active = Js.to_bool sick_chk##.checked in
         let () = Firebug.console##log (Js.string "clic") in
         btn##.classList##add (Js.string "button-des");
-        play ();
-    
-        (*
-        set_default_speed (if Js.to_bool chk##.checked then 1.1 else 0.5);
-        let speed_value = get_default_speed () in
-        Firebug.console##log (Js.string ("default_speed: " ^ string_of_float speed_value));
-        *)
+
+        play ~is_sick_active;
+
+        (* Resto del código si es necesario *)
+
         Js._true
       )
     | _ -> ()
@@ -174,7 +171,7 @@ let page =
         h1 [txt "H42N42"]
       ];
       start_button;
-      speed_checkbox;
+      params_checkbox;
       board;
     ]
   ]
