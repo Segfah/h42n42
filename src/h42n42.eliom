@@ -35,13 +35,14 @@ open Creet
 
   (* ------------  RUNNER ------------   *)
 
-  (* Met à jour le statut de chaque 'creet' en fonction de sa santé. *)
-  let updateStatuses creets_list =
+  (* Met à jour le statut de chaque 'creet' en fonction de sa santé et de grab. *)
+    let updateStatuses creets_list =
       let healthy, sick = List.partition (fun creet -> creet.status == Healthy) creets_list in
-      let updated_healthy = List.map (fun creet -> Creet.update creet sick) healthy in
-      let updated_sick = List.map (fun creet -> Creet.update creet healthy) sick in
+      let updated_healthy = List.map (fun creet -> if not creet.grab then Creet.update creet sick else creet) healthy in
+      let updated_sick = List.map (fun creet -> if not creet.grab then Creet.update creet healthy else creet) sick in
 
       updated_sick @ updated_healthy
+
 
   (* Retire de la div les 'creets' qui sont morts. *)
   let removeDead creets_list =

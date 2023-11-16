@@ -112,7 +112,7 @@ open Lwt_js_events
 			creet.dom##.style##.marginTop := _into_px creet.margin_top
 
 		let _handle_events creet mouse_down _ =
-		creet.grab <- false;
+		creet.grab <- true;
 		event_mouse creet mouse_down;
 		Lwt.pick
 			[
@@ -121,7 +121,7 @@ open Lwt_js_events
 				Lwt.return ());
 			(let%lwt mouse_up = mouseup Dom_html.document in
 			event_mouse creet mouse_up;
-			creet.grab <- true;
+			creet.grab <- false;
 			Lwt.return ());
 			]
 
