@@ -28,7 +28,7 @@ open Lwt_js_events
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
 
-	let default_speed = 0.2
+	let default_speed = 0.5
 
 	let update_size creet size =
 		creet.size <- size;
@@ -96,30 +96,43 @@ open Lwt_js_events
 		in
 		dir
 
-		let event_mouse creet event =
-			Firebug.console##log event;
-			let radius = creet.size /. 2. in
+let event_mouse creet event =
+    Firebug.console##log event;
+    let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+                    (fun () -> assert false) in
+    let container_rect = container##getBoundingClientRect in
+
+    let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
+    let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
+
+    let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
+    let mouse_y = (float_of_int event##.clientY) -. container_rect##.top in
+
+    let creet_half_width = creet.size /. 2. in
+    let creet_half_height = creet.size /. 2. in
+
+    let left = mouse_x -. creet_half_width in
+    let top = mouse_y -. creet_half_height in
+
+    creet.margin_left <- max 0. (min (container_width -. creet.size) left);
+    creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
+
+    creet.dom##.style##.marginLeft := _into_px creet.margin_left;
+    creet.dom##.style##.marginTop := _into_px creet.margin_top
 
 
-			let top = float_of_int event##.clientY in
-			let left = float_of_int event##.clientX in
-
-
-			creet.margin_left <- left;
-			creet.margin_top <- top;
-
-			creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-			creet.dom##.style##.marginTop := _into_px creet.margin_top
 
 		let _handle_events creet mouse_down _ =
 		creet.grab <- true;
 		event_mouse creet mouse_down;
+		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+						(fun () -> assert false) in
 		Lwt.pick
 			[
-			mousemoves Dom_html.document (fun mouse_move _ ->
+			mousemoves container (fun mouse_move _ ->
 				event_mouse creet mouse_move;
 				Lwt.return ());
-			(let%lwt mouse_up = mouseup Dom_html.document in
+			(let%lwt mouse_up = mouseup container in
 			event_mouse creet mouse_up;
 			creet.grab <- false;
 			Lwt.return ());

@@ -158,7 +158,7 @@ let hospital =
 
 let board =
   div ~a:[a_class [""]] [
-    div ~a:[a_class ["container"]] [
+    div ~a:[a_class ["container"]; a_id("miContenedor")] [
       river;
       bueno;
       hospital;
