@@ -106,7 +106,7 @@ let event_mouse creet event =
     let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
 
     let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
-    let mouse_y = (float_of_int event##.clientY) -. container_rect##.top in
+    let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
 
     let creet_half_width = creet.size /. 2. in
     let creet_half_height = creet.size /. 2. in
