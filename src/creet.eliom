@@ -35,6 +35,64 @@ open Lwt_js_events
 		creet.dom##.style##.height := _into_px creet.size;
 		creet.dom##.style##.width := _into_px creet.size
 
+
+    let set_background_image creet =
+        let img_url = match creet.status with
+            | Healthy -> "../images/run_sonic.gif"
+            | Sick -> "../images/maladev1.gif"
+            | Berserk -> "../images/berserkv1.gif"
+            | Mean -> "../images/robotnic.gif"
+            | Dead -> "../images/bombv1.gif"
+        in
+        creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
+
+	let nursing creet =
+		match creet.status with
+		| Sick ->
+			creet.speed <- creet.speed *. 1.25;
+			creet.status <- Healthy;
+			creet.state_counter <- -1;
+			set_background_image creet;
+			creet
+		| Berserk ->
+			creet.speed <- creet.speed *. 1.25;
+			creet.status <- Healthy;
+			creet.state_counter <- -1;
+			update_size creet (50.);
+			set_background_image creet;
+			creet
+		| Mean ->
+			creet.status <- Healthy;
+			creet.state_counter <- -1;
+			update_size creet (50.);
+			set_background_image creet;
+			creet
+		| _ -> creet 
+
+    let change_status_randomly creet =
+        let chance = Random.int 100 in
+        match creet.status with
+        | Healthy ->
+            creet.speed <- creet.speed *. 0.85;
+            creet.state_counter <- 800;
+            if chance < 80 then begin
+                creet.status <- Sick;
+			end
+            else if chance < 90 then begin
+                creet.status <- Berserk;
+                set_background_image creet;
+            end
+            else begin
+                creet.status <- Mean;
+				(* Reduce mean creet size by 15% *)
+				update_size creet (creet.size *. 0.85);
+				creet.speed<- default_speed *. 1.10;
+                set_background_image creet;
+            end;
+            creet
+        | _ -> creet  (* s'il est deja malade il ne change pas de status*)
+
+
     let random_direction creet =
         let vertical_chances = match creet with 
 			| None -> 50.
@@ -96,47 +154,51 @@ open Lwt_js_events
 		in
 		dir
 
-let event_mouse creet event =
-    Firebug.console##log event;
-    let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-                    (fun () -> assert false) in
-    let container_rect = container##getBoundingClientRect in
-
-    let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
-    let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
-
-    let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
-    let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
-
-    let creet_half_width = creet.size /. 2. in
-    let creet_half_height = creet.size /. 2. in
-
-    let left = mouse_x -. creet_half_width in
-    let top = mouse_y -. creet_half_height in
-
-    creet.margin_left <- max 0. (min (container_width -. creet.size) left);
-    creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
-
-    creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-    creet.dom##.style##.marginTop := _into_px creet.margin_top
-
-
-
-		let _handle_events creet mouse_down _ =
-		creet.grab <- true;
-		event_mouse creet mouse_down;
+	let event_mouse creet event =
+		Firebug.console##log event;
 		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
 						(fun () -> assert false) in
-		Lwt.pick
-			[
-			mousemoves container (fun mouse_move _ ->
-				event_mouse creet mouse_move;
-				Lwt.return ());
-			(let%lwt mouse_up = mouseup container in
-			event_mouse creet mouse_up;
-			creet.grab <- false;
-			Lwt.return ());
-			]
+		let container_rect = container##getBoundingClientRect in
+
+		let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
+		let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
+
+		let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
+		let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
+
+		let creet_half_width = creet.size /. 2. in
+		let creet_half_height = creet.size /. 2. in
+
+		let left = mouse_x -. creet_half_width in
+		let top = mouse_y -. creet_half_height in
+
+		creet.margin_left <- max 0. (min (container_width -. creet.size) left);
+		creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
+
+		creet.dom##.style##.marginLeft := _into_px creet.margin_left;
+		creet.dom##.style##.marginTop := _into_px creet.margin_top
+
+
+
+	let _handle_events creet mouse_down _ =
+    creet.grab <- true;
+    event_mouse creet mouse_down;
+    let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+                    (fun () -> assert false) in
+    Lwt.pick
+        [
+            mousemoves container (fun mouse_move _ ->
+                event_mouse creet mouse_move;
+                Lwt.return ());
+            (let%lwt mouse_up = mouseup container in
+            event_mouse creet mouse_up;
+            creet.grab <- false;
+            (* Aquí se llama a nursing si se cumplen las condiciones *)
+            if creet.margin_top > 500. then begin
+				ignore (nursing creet)
+            end;
+            Lwt.return ());
+        ]
 
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
@@ -174,40 +236,6 @@ let event_mouse creet event =
         let msg = Printf.sprintf "size: %f, margin_top: %f, margin_left: %f, status: %s" 
             creet.size creet.margin_top creet.margin_left status_str in
         Firebug.console##log (Js.string msg)
-
-    let set_background_image creet =
-        let img_url = match creet.status with
-            | Healthy -> "../images/run_sonic.gif"
-            | Sick -> "../images/maladev1.gif"
-            | Berserk -> "../images/berserkv1.gif"
-            | Mean -> "../images/robotnic.gif"
-            | Dead -> "../images/bombv1.gif"
-        in
-        creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
-
-    let change_status_randomly creet =
-        let chance = Random.int 100 in
-        match creet.status with
-        | Healthy ->
-            creet.speed <- creet.speed *. 0.85;
-            creet.state_counter <- 800;
-            if chance < 80 then begin
-                creet.status <- Sick;
-			end
-            else if chance < 90 then begin
-                creet.status <- Berserk;
-                set_background_image creet;
-            end
-            else begin
-                creet.status <- Mean;
-				(* Reduce mean creet size by 15% *)
-				update_size creet (creet.size *. 0.85);
-				creet.speed<- default_speed *. 1.10;
-                set_background_image creet;
-            end;
-            creet
-        | _ -> creet  (* s'il est deja malade il ne change pas de status*)
-
 
 	let move creet = 
         let next_margin_top = creet.margin_top +. creet.dir.vertical *. creet.speed in
