@@ -98,6 +98,7 @@ body {
     height: auto;
     display: block;
     animation: moveFromRightToLeft 10s linear infinite;
+    pointer-events: none;
 }
 
 /* FIN river */
@@ -122,6 +123,7 @@ body {
 }
 
 .doctor-img {
+    pointer-events: none;
     width: 30%;
     height: auto;
 }
