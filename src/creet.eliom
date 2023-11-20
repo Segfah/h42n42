@@ -179,26 +179,29 @@ open Lwt_js_events
 		creet.dom##.style##.marginTop := _into_px creet.margin_top
 
 
-
 	let _handle_events creet mouse_down _ =
-    creet.grab <- true;
-    event_mouse creet mouse_down;
-    let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-                    (fun () -> assert false) in
-    Lwt.pick
-        [
-            mousemoves container (fun mouse_move _ ->
-                event_mouse creet mouse_move;
-                Lwt.return ());
-            (let%lwt mouse_up = mouseup container in
-            event_mouse creet mouse_up;
-            creet.grab <- false;
-            (* Aquí se llama a nursing si se cumplen las condiciones *)
-            if creet.margin_top > 500. then begin
-				ignore (nursing creet)
-            end;
-            Lwt.return ());
-        ]
+		if creet.status = Dead then
+			Lwt.return_unit
+		else begin
+			creet.grab <- true;
+			event_mouse creet mouse_down;
+			let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+							(fun () -> assert false) in
+			Lwt.pick
+				[
+					mousemoves container (fun mouse_move _ ->
+						event_mouse creet mouse_move;
+						Lwt.return ());
+					(let%lwt mouse_up = mouseup container in
+					event_mouse creet mouse_up;
+					creet.grab <- false;
+					(* Aquí se llama a nursing si se cumplen las condiciones *)
+					if creet.margin_top > 500. then begin
+						ignore (nursing creet)
+					end;
+					Lwt.return ());
+				]
+		end
 
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
