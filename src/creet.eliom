@@ -155,28 +155,30 @@ open Lwt_js_events
 		dir
 
 	let event_mouse creet event =
-		Firebug.console##log event;
-		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-						(fun () -> assert false) in
-		let container_rect = container##getBoundingClientRect in
 
-		let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
-		let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
+			Firebug.console##log event;
+			let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+							(fun () -> assert false) in
+			let container_rect = container##getBoundingClientRect in
 
-		let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
-		let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
+			let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
+			let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
 
-		let creet_half_width = creet.size /. 2. in
-		let creet_half_height = creet.size /. 2. in
+			let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
+			let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
 
-		let left = mouse_x -. creet_half_width in
-		let top = mouse_y -. creet_half_height in
+			let creet_half_width = creet.size /. 2. in
+			let creet_half_height = creet.size /. 2. in
 
-		creet.margin_left <- max 0. (min (container_width -. creet.size) left);
-		creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
+			let left = mouse_x -. creet_half_width in
+			let top = mouse_y -. creet_half_height in
 
-		creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-		creet.dom##.style##.marginTop := _into_px creet.margin_top
+			creet.margin_left <- max 0. (min (container_width -. creet.size) left);
+			creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
+
+			creet.dom##.style##.marginLeft := _into_px creet.margin_left;
+			creet.dom##.style##.marginTop := _into_px creet.margin_top
+
 
 
 	let _handle_events creet mouse_down _ =
@@ -203,6 +205,14 @@ open Lwt_js_events
 				]
 		end
 
+	let handle_mouse_leave creet _ =
+		if creet.grab then begin
+			creet.grab <- false;
+			(* Aquí puedes poner cualquier otra lógica necesaria cuando se suelta el clic *)
+			Lwt.return_unit
+		end else Lwt.return_unit
+
+
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
         let size = 50. in
@@ -226,7 +236,10 @@ open Lwt_js_events
 		creet.dom##.style##.marginTop := _into_px creet.margin_top;
         creet.dom##.style##.marginLeft := _into_px creet.margin_left;
 		Lwt.async (fun () -> mousedowns creet.dom (_handle_events creet));
-        creet
+		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
+						(fun () -> assert false) in
+		Lwt.async (fun () -> mouseouts container (fun _ -> handle_mouse_leave creet));
+		creet
     
     let print_creet creet = 
         let status_str = match creet.status with
