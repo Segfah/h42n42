@@ -46,27 +46,21 @@ open Lwt_js_events
         creet.dom##.style##.backgroundImage := Js.string (Printf.sprintf "url('%s')" img_url)
 
 	let nursing creet =
+		let common_actions () =
+			creet.status <- Healthy;
+			creet.state_counter <- -1;
+			update_size creet 50.;
+			set_background_image creet;
+		in
 		match creet.status with
-		| Sick ->
+		| Sick | Berserk ->
 			creet.speed <- creet.speed *. 1.25;
-			creet.status <- Healthy;
-			creet.state_counter <- -1;
-			set_background_image creet;
-			creet
-		| Berserk ->
-			creet.speed <- creet.speed *. 1.25;
-			creet.status <- Healthy;
-			creet.state_counter <- -1;
-			update_size creet (50.);
-			set_background_image creet;
+			common_actions ();
 			creet
 		| Mean ->
-			creet.status <- Healthy;
-			creet.state_counter <- -1;
-			update_size creet (50.);
-			set_background_image creet;
+			common_actions ();
 			creet
-		| _ -> creet 
+		| _ -> creet
 
     let change_status_randomly creet =
         let chance = Random.int 100 in
