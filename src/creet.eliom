@@ -27,7 +27,6 @@ open Lwt_js_events
     }
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
-
 	let default_speed = 0.5
 
 	let update_size creet size =
@@ -156,28 +155,26 @@ open Lwt_js_events
 
 	let event_mouse creet event =
 
-			Firebug.console##log event;
-			let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-							(fun () -> assert false) in
-			let container_rect = container##getBoundingClientRect in
+		Firebug.console##log event;
+		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor")) 
+			(fun () -> assert false) in
+		let container_rect = container##getBoundingClientRect in
+		let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
 
-			let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
-			let container_height = Js.Optdef.get container_rect##.height (fun () -> assert false) in
+		let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
+		let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
 
-			let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
-			let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
+		let creet_half_width = creet.size /. 2. in
+		let creet_half_height = creet.size /. 2. in
 
-			let creet_half_width = creet.size /. 2. in
-			let creet_half_height = creet.size /. 2. in
+		let left = mouse_x -. creet_half_width in
+		let top = mouse_y -. creet_half_height in
 
-			let left = mouse_x -. creet_half_width in
-			let top = mouse_y -. creet_half_height in
+		creet.margin_left <- max 0. (min (container_width -. creet.size) left);
+		creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
 
-			creet.margin_left <- max 0. (min (container_width -. creet.size) left);
-			creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
-
-			creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-			creet.dom##.style##.marginTop := _into_px creet.margin_top
+		creet.dom##.style##.marginLeft := _into_px creet.margin_left;
+		creet.dom##.style##.marginTop := _into_px creet.margin_top
 
 
 
@@ -187,31 +184,18 @@ open Lwt_js_events
 		else begin
 			creet.grab <- true;
 			event_mouse creet mouse_down;
-			let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-							(fun () -> assert false) in
-			Lwt.pick
-				[
-					mousemoves container (fun mouse_move _ ->
-						event_mouse creet mouse_move;
-						Lwt.return ());
-					(let%lwt mouse_up = mouseup container in
-					event_mouse creet mouse_up;
-					creet.grab <- false;
-					(* Aquí se llama a nursing si se cumplen las condiciones *)
-					if creet.margin_top > 500. then begin
-						ignore (nursing creet)
-					end;
-					Lwt.return ());
-				]
-		end
-
-	let handle_mouse_leave creet _ =
-		if creet.grab then begin
+			let mouse_move_handler = mousemoves Dom_html.document (fun mouse_move _ ->
+				event_mouse creet mouse_move;
+				Lwt.return ()) in
+			let%lwt mouse_up = mouseup Dom_html.document in
+			event_mouse creet mouse_up;
 			creet.grab <- false;
-			(* Aquí puedes poner cualquier otra lógica necesaria cuando se suelta el clic *)
+			if creet.margin_top > 500. then begin
+				ignore (nursing creet)
+			end;
+			Lwt.cancel mouse_move_handler;  (* Detiene la escucha de eventos de movimiento del mouse *)
 			Lwt.return_unit
-		end else Lwt.return_unit
-
+		end
 
     let create () = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
@@ -236,9 +220,6 @@ open Lwt_js_events
 		creet.dom##.style##.marginTop := _into_px creet.margin_top;
         creet.dom##.style##.marginLeft := _into_px creet.margin_left;
 		Lwt.async (fun () -> mousedowns creet.dom (_handle_events creet));
-		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor"))
-						(fun () -> assert false) in
-		Lwt.async (fun () -> mouseouts container (fun _ -> handle_mouse_leave creet));
 		creet
     
     let print_creet creet = 
@@ -280,7 +261,7 @@ open Lwt_js_events
 	let compute_creet_dir creet creets_list = 
 		let dir = match creet.status with
 	   	| Healthy | Berserk | Sick ->
-	       if  Random.int 100 <= 3 then
+	       if  Random.int 100 <= 1 then
 	           random_direction (Some creet)
 		   else
 			   creet.dir
