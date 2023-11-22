@@ -87,7 +87,7 @@ open Creet
       let remaining_creet_list = removeDead updated_list in
       let healthy_count = List.fold_left (fun acc c -> if c.status == Creet.Healthy then acc + 1 else acc) 0 remaining_creet_list in
        (* Augmente la vitesse du jeu progressivement. *)
-      if timestamp mod 1500 == 0 && !default_speed < 1.6 then
+      if timestamp mod 2500 == 0 && !default_speed < 1.6 then
           default_speed := !default_speed *. 1.10;
       (* Ajoute de nouveaux creets si nécessaire (max 10). *)
       let remaining_creet_list = 

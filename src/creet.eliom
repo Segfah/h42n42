@@ -10,8 +10,8 @@ open Lwt_js_events
 
 	(* Typdefinition für die Bewegungsrichtung, bestehend aus vertikaler und horizontaler Komponente. *)
 	type direction = {
-			vertical: float;
-			horizontal: float;
+			mutable vertical: float;
+			mutable horizontal: float;
 	}
 
 	(* Typdefinition für ein 'Creet' mit Eigenschaften wie Element, Zustand, Position, Größe, Geschwindigkeit, Richtung und weiteren. *)
@@ -226,28 +226,31 @@ open Lwt_js_events
         Firebug.console##log (Js.string msg)
 
 	let move creet = 
-        let next_margin_top = creet.margin_top +. creet.dir.vertical *. creet.speed in
-        let next_margin_left = creet.margin_left +. creet.dir.horizontal *. creet.speed in
+		let next_margin_top = creet.margin_top +. creet.dir.vertical *. creet.speed in
+		let next_margin_left = creet.margin_left +. creet.dir.horizontal *. creet.speed in
 
-        if next_margin_top >= (620. -. creet.size) || next_margin_top <= -80. then begin
+		(* Verifica y maneja el rebote en los bordes verticales *)
+		if next_margin_top > (620. -. creet.size) || next_margin_top < -80. then begin
+			creet.dir.vertical <- -1. *. creet.dir.vertical;  (* Invierte la dirección vertical para el rebote *)
 			creet.margin_top <- creet.margin_top -. creet.dir.vertical *. creet.speed; 
-		end
-		else
-			creet.margin_top <- creet.margin_top +. creet.dir.vertical *. creet.speed;
+		end else begin
+			creet.margin_top <- next_margin_top;
+		end;
 
+		(* Verifica y maneja el rebote en los bordes horizontales *)
+		if next_margin_left > (800. -. creet.size) || next_margin_left < 0. then begin
+			creet.dir.horizontal <- -1. *. creet.dir.horizontal;  (* Invierte la dirección horizontal para el rebote *)
+			creet.margin_left <- creet.margin_left -. creet.dir.horizontal *. creet.speed;
+		end else begin
+			creet.margin_left <- next_margin_left;
+		end;
 
-        if next_margin_left >= (800. -. creet.size) || next_margin_left <= 0. then begin
-        	creet.margin_left <- creet.margin_left -. creet.dir.horizontal *. creet.speed;
-		end
-		else
-        	creet.margin_left <- creet.margin_left +. creet.dir.horizontal *. creet.speed;
+		creet.dom##.style##.marginTop  := _into_px creet.margin_top;
+		creet.dom##.style##.marginLeft := _into_px creet.margin_left;
 
-        creet.dom##.style##.marginTop  := _into_px creet.margin_top;
-        creet.dom##.style##.marginLeft := _into_px creet.margin_left;
-
-        if creet.margin_top < -50. then (* la taille de l'image css *)
-            ignore (change_status_randomly creet);
-        creet
+		if creet.margin_top < -50. then (* la taille de l'image css *)
+			ignore (change_status_randomly creet);
+		creet
 	
 	let compute_creet_dir creet creets_list = 
 		let dir = match creet.status with
