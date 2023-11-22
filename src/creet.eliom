@@ -147,12 +147,9 @@ open Lwt_js_events
 		dir
 
 	let event_mouse creet event =
-
-		Firebug.console##log event;
 		let container = Js.Opt.get (Dom_html.document##getElementById (Js.string "miContenedor")) 
 			(fun () -> assert false) in
 		let container_rect = container##getBoundingClientRect in
-		let container_width = Js.Optdef.get container_rect##.width (fun () -> assert false) in
 
 		let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
 		let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
@@ -162,8 +159,7 @@ open Lwt_js_events
 
 		let left = mouse_x -. creet_half_width in
 		let top = mouse_y -. creet_half_height in
-
-		creet.margin_left <- max 0. (min (container_width -. creet.size) left);
+		creet.margin_left <- max 0. (min (800. -. creet.size) left);
 		creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
 
 		creet.dom##.style##.marginLeft := _into_px creet.margin_left;

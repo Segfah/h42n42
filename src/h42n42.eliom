@@ -122,7 +122,6 @@ open Creet
       btn##.onclick := Dom_html.handler (fun _ ->
         let is_double_speed = Js.to_bool chk##.checked in
         let is_sick_active = Js.to_bool sick_chk##.checked in
-        let () = Firebug.console##log (Js.string "clic") in
         btn##.classList##add (Js.string "button-des");
         play ~is_sick_active ~is_double_speed;
 
