@@ -27,7 +27,6 @@ open Lwt_js_events
     }
 
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
-	let default_speed = 0.5
 
 	let update_size creet size =
 		creet.size <- size;
@@ -79,7 +78,7 @@ open Lwt_js_events
                 creet.status <- Mean;
 				(* Reduce mean creet size by 15% *)
 				update_size creet (creet.size *. 0.85);
-				creet.speed<- default_speed *. 1.10;
+				creet.speed<- creet.speed *. 1.10;
                 set_background_image creet;
             end;
             creet
@@ -191,7 +190,7 @@ open Lwt_js_events
 			Lwt.return_unit
 		end
 
-    let create () = 
+    let create default_speed = 
         let elt = div ~a:[ a_class [ "creet" ] ] [] in
         let size = 50. in
         let creet = {

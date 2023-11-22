@@ -27,8 +27,10 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Creet
 
+  let default_speed = ref 0.5
+
 	let creet_init () = (
-      let creet = Creet.create () in
+      let creet = Creet.create !default_speed in
       Html.Manip.appendChild ~%bueno creet.elt;
 		  creet
   )
@@ -78,11 +80,13 @@ open Creet
       let updated_list = updateStatuses creets_list in
       let remaining_creet_list = removeDead updated_list in
       let healthy_count = List.fold_left (fun acc c -> if c.status == Creet.Healthy then acc + 1 else acc) 0 remaining_creet_list in
-      let remaining_creet_list = 
-          if healthy_count > 0 && (List.length remaining_creet_list) < 10 && timestamp mod 1000 == 0 then
-              remaining_creet_list @ [creet_init ()]
-          else
-              remaining_creet_list
+      if timestamp mod 1500 == 0 && !default_speed < 1.6 then
+          default_speed := !default_speed *. 1.10;
+        let remaining_creet_list = 
+            if healthy_count > 0 && (List.length remaining_creet_list) < 10 && timestamp mod 1000 == 0 then
+                remaining_creet_list @ [creet_init ()]
+            else
+                remaining_creet_list
       in
       if remaining_creet_list = [] then begin
           displayLostMessage ();
@@ -93,13 +97,14 @@ open Creet
       end
 
   (* ------------  FIN RUNNER ------------   *)
-	
 
-  let play ~is_sick_active =
+
+  let play ~is_sick_active ~is_double_speed =
     Random.self_init();
+    default_speed := if is_double_speed then 0.8 else 0.4;
     let list_ref = ref (List.init 4 (fun _ -> creet_init ())) in
     if is_sick_active then begin
-      let modified_screet = Creet.create () |> Creet.change_status_randomly in
+      let modified_screet = Creet.create !default_speed |> Creet.change_status_randomly in
       Html.Manip.appendChild ~%bueno modified_screet.elt;
       list_ref := modified_screet :: !list_ref;
     end;
@@ -115,11 +120,11 @@ open Creet
     match (button, scheckbox, sick_checkbox) with
     | (Some btn, Some chk, Some sick_chk) ->
       btn##.onclick := Dom_html.handler (fun _ ->
+        let is_double_speed = Js.to_bool chk##.checked in
         let is_sick_active = Js.to_bool sick_chk##.checked in
         let () = Firebug.console##log (Js.string "clic") in
         btn##.classList##add (Js.string "button-des");
-
-        play ~is_sick_active;
+        play ~is_sick_active ~is_double_speed;
 
         (* Resto del código si es necesario *)
 
