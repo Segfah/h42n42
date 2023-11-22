@@ -5,7 +5,11 @@ open Html.D
 open Js_of_ocaml
 
 let bueno = div ~a:[a_class ["bueno"]] []
+
+(* Création d'un bouton de démarrage pour le jeu. *)
 let start_button = div ~a:[a_class ["button-start"]; a_id "start-button"] [txt "JUGAR"]
+
+(* Création des cases à cocher pour configurer les paramètres du jeu tels que la vitesse et la santé du personnage. *)
 let params_checkbox =
   div ~a:[a_class ["parameters-containers"]] [
     div ~a:[a_class ["speed-checkbox"]] [
@@ -56,6 +60,7 @@ open Creet
           not (creet.status == Dead && creet.state_counter == 0)
       ) creets_list
 
+  (* Affiche un message de défaite lorsque le joueur perd. *)
   let displayLostMessage () =
       let overlay = div ~a:[a_class ["perdiste-overlay"]] [] in
       let imagen = img ~a:[a_class ["virus-gif"]] ~src:(make_uri ~service:(Eliom_service.static_dir ()) ["images"; "virus.gif"]) ~alt:"Virus" () in
@@ -76,19 +81,23 @@ open Creet
       Dom.appendChild (Html.To_dom.of_div overlay) (Html.To_dom.of_div button_clone);
       Dom.appendChild (Dom_html.document##.body) (Html.To_dom.of_div overlay)
 
+  (* Logique principale du jeu qui met à jour l'état des 'creets' et gère les événements. *)
   let rec runner creets_list timestamp = 
       let updated_list = updateStatuses creets_list in
       let remaining_creet_list = removeDead updated_list in
       let healthy_count = List.fold_left (fun acc c -> if c.status == Creet.Healthy then acc + 1 else acc) 0 remaining_creet_list in
+       (* Augmente la vitesse du jeu progressivement. *)
       if timestamp mod 1500 == 0 && !default_speed < 1.6 then
           default_speed := !default_speed *. 1.10;
-        let remaining_creet_list = 
-            if healthy_count > 0 && (List.length remaining_creet_list) < 10 && timestamp mod 1000 == 0 then
-                remaining_creet_list @ [creet_init ()]
-            else
-                remaining_creet_list
+      (* Ajoute de nouveaux creets si nécessaire (max 10). *)
+      let remaining_creet_list = 
+          if healthy_count > 0 && (List.length remaining_creet_list) < 10 && timestamp mod 1000 == 0 then
+              remaining_creet_list @ [creet_init ()]
+          else
+              remaining_creet_list
       in
-      if remaining_creet_list = [] then begin
+      (* Affiche un message de perte si tous les creets sont morts. *)
+      if remaining_creet_list = [] then begin 
           displayLostMessage ();
           Lwt.return_unit
       end else begin
@@ -98,20 +107,22 @@ open Creet
 
   (* ------------  FIN RUNNER ------------   *)
 
-
+  (* Démarre le jeu et applique les paramètres sélectionnés. *)
   let play ~is_sick_active ~is_double_speed =
     Random.self_init();
-    default_speed := if is_double_speed then 0.8 else 0.4;
+    default_speed := if is_double_speed then 0.8 else 0.4;     (* Définit la vitesse de départ en fonction des paramètres. *)
     let list_ref = ref (List.init 4 (fun _ -> creet_init ())) in
-    if is_sick_active then begin
+    
+    (* Active un personnage malade si sélectionné. *)
+    if is_sick_active then begin      
       let modified_screet = Creet.create !default_speed |> Creet.change_status_randomly in
       Html.Manip.appendChild ~%bueno modified_screet.elt;
       list_ref := modified_screet :: !list_ref;
     end;
 
-    Lwt.async (fun () -> runner !list_ref 1)
+    Lwt.async (fun () -> runner !list_ref 1)   (* Lance la boucle principale du jeu. *)
     
-  (* Attache un événement de clic au bouton de démarrage *)
+  (* Attache un événement de clic au bouton de démarrage et gère les cases à cocher. *)
   let attach_start_event () =
     let button = Dom_html.getElementById_coerce "start-button" Dom_html.CoerceTo.div in
     let scheckbox = Dom_html.getElementById_coerce "speedCheckbox" Dom_html.CoerceTo.input in
@@ -124,13 +135,11 @@ open Creet
         let is_sick_active = Js.to_bool sick_chk##.checked in
         btn##.classList##add (Js.string "button-des");
         play ~is_sick_active ~is_double_speed;
-
-        (* Resto del código si es necesario *)
-
         Js._true
       )
     | _ -> ()
 
+  (* Initialisation des événements au chargement de la page. *)
   let () = attach_start_event ()
 
 (**)]
@@ -138,7 +147,6 @@ open Creet
 [%%server
 open Eliom_content
 open Html.D
-
 
 module H42n42_app =
   Eliom_registration.App (
@@ -180,7 +188,6 @@ let page =
       board;
     ]
   ]
-
 
 let main_service =
   Eliom_service.create
