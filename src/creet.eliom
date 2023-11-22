@@ -5,13 +5,16 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Lwt_js_events
 
+	(* Zustandstypen eines 'Creet'. Mögliche Zustände: Gesund, Krank, Berserker, Gemein, Tot. *)
     type state = Healthy | Sick | Berserk | Mean | Dead
 
+	(* Typdefinition für die Bewegungsrichtung, bestehend aus vertikaler und horizontaler Komponente. *)
 	type direction = {
 			vertical: float;
 			horizontal: float;
 	}
 
+	(* Typdefinition für ein 'Creet' mit Eigenschaften wie Element, Zustand, Position, Größe, Geschwindigkeit, Richtung und weiteren. *)
     type creet = {
         elt: Html_types.div elt;
         dom : Dom_html.divElement Js.t;
@@ -26,14 +29,16 @@ open Lwt_js_events
 		mutable probability: float;
     }
 
+	(* Wandelt eine Zahl in einen Pixelwert (Stringformat) *)
     let _into_px number = Js.string (Printf.sprintf "%fpx" number)
 
+	(* Aktualisiert die Größe eines 'Creet'. *)
 	let update_size creet size =
 		creet.size <- size;
 		creet.dom##.style##.height := _into_px creet.size;
 		creet.dom##.style##.width := _into_px creet.size
 
-
+	(* Setzt das Hintergrundbild eines 'Creet' basierend auf seinem Zustand. *)
     let set_background_image creet =
         let img_url = match creet.status with
             | Healthy -> "../images/run_sonic.gif"
@@ -154,11 +159,8 @@ open Lwt_js_events
 		let mouse_x = (float_of_int event##.clientX) -. container_rect##.left in
 		let mouse_y = (float_of_int event##.clientY) -. container_rect##.top -. 80. in
 
-		let creet_half_width = creet.size /. 2. in
-		let creet_half_height = creet.size /. 2. in
-
-		let left = mouse_x -. creet_half_width in
-		let top = mouse_y -. creet_half_height in
+		let left = mouse_x -. creet.size /. 2. in
+		let top = mouse_y -. creet.size /. 2. in
 		creet.margin_left <- max 0. (min (800. -. creet.size) left);
 		creet.margin_top <- max (-80.) (min (620. -. creet.size) top);
 
@@ -271,9 +273,6 @@ open Lwt_js_events
 			creet.speed <- creet.speed *. 1.10;
 			creet.probability <- creet.probability *. 1.0001
 			
-
-
-
    (* Creet list contains either sick or helthy creets depending on the creet state *)
    let update creet creets_list = 
 	   creet.state_counter <- creet.state_counter - 1;
