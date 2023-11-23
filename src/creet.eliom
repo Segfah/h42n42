@@ -267,7 +267,7 @@ open Lwt_js_events
 		dir
 
    let berserk_size creet =
-		if creet.state_counter mod 50 == 0 then
+		if creet.state_counter mod 50 == 0 && creet.margin_top < 500. then
 			update_size creet (creet.size *. 1.05)
 
 	
