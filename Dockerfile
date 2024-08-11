@@ -51,6 +51,6 @@ COPY src/start.sh /start.sh
 RUN eval $(opam env) && opam install -y eliom
 
 # Establece el script como el comando por defecto a ejecutar cuando se inicie el contenedor
-#CMD ["/start.sh"]
+CMD ["/start.sh"]
 
-CMD ["/usr/sbin/sshd", "-D"]
+#CMD ["/usr/sbin/sshd", "-D"]
